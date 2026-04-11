@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
-import { dummyProperties, formatPrice } from '@/lib/data';
+import { dummyProperties, formatPrice, getPropertyImage } from '@/lib/data';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -42,13 +42,15 @@ const PropertyDetail = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Image */}
               <div className="relative h-64 md:h-96 bg-muted rounded-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-navy/20 to-navy/60 flex items-center justify-center">
-                  <span className="text-primary-foreground/40">Property Gallery</span>
-                </div>
+                <img
+                  src={getPropertyImage(property)}
+                  alt={property.title}
+                  className="w-full h-full object-cover"
+                  width={800}
+                  height={600}
+                />
                 {property.verified && (
                   <div className="absolute top-4 left-4 flex items-center gap-1 bg-success/90 text-primary-foreground text-sm font-medium px-3 py-1.5 rounded-full">
                     <ShieldCheck className="w-4 h-4" /> V-Audit Verified
@@ -56,14 +58,12 @@ const PropertyDetail = () => {
                 )}
               </div>
 
-              {/* Overview */}
               <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
                 <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
                   <MapPin className="w-4 h-4" /> {property.location}, Nagpur
                 </div>
                 <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">{property.title}</h1>
                 <p className="text-muted-foreground leading-relaxed mb-6">{property.description}</p>
-
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
                     { label: 'Price', value: formatPrice(property.price) },
@@ -79,7 +79,6 @@ const PropertyDetail = () => {
                 </div>
               </div>
 
-              {/* V-Audit */}
               <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-gold" /> V-Audit™ Report
@@ -97,7 +96,6 @@ const PropertyDetail = () => {
               </div>
             </div>
 
-            {/* Sidebar CTAs */}
             <div className="space-y-6">
               <div className="bg-card rounded-xl p-6 shadow-card border border-border/50 sticky top-24">
                 <div className="text-2xl font-bold text-navy mb-1">{formatPrice(property.price)}</div>
