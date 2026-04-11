@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, Users, Home, CheckCircle, XCircle, Clock, MessageSquare, TrendingUp, Shield } from 'lucide-react';
+import { BarChart3, Users, Home, CheckCircle, XCircle, Clock, MessageSquare, TrendingUp, Shield, Search, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,18 +22,25 @@ const AdminPanel = () => {
   const [properties, setProperties] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     const load = async () => {
-      const [propRes, inqRes, txRes] = await Promise.all([
+      const [propRes, inqRes, txRes, profRes] = await Promise.all([
         supabase.from('properties').select('*').order('created_at', { ascending: false }),
         supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
         supabase.from('transactions').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*'),
       ]);
       setProperties(propRes.data || []);
       setInquiries(inqRes.data || []);
       setTransactions(txRes.data || []);
+      const profileMap: Record<string, any> = {};
+      (profRes.data || []).forEach(p => { profileMap[p.user_id] = p; });
+      setProfiles(profileMap);
       setLoading(false);
     };
     load();
@@ -43,6 +56,12 @@ const AdminPanel = () => {
     await supabase.from('properties').update({ status: 'rejected' }).eq('id', id);
     setProperties(prev => prev.map(p => p.id === id ? { ...p, status: 'rejected' } : p));
     toast.success('Property rejected');
+  };
+
+  const toggleVisibility = async (id: string, visible: boolean) => {
+    await supabase.from('properties').update({ visible }).eq('id', id);
+    setProperties(prev => prev.map(p => p.id === id ? { ...p, visible } : p));
+    toast.success(visible ? 'Property is now visible on website' : 'Property hidden from website');
   };
 
   const updateLeadStatus = async (id: string, status: string) => {
@@ -68,12 +87,39 @@ const AdminPanel = () => {
   const newLeads = inquiries.filter(i => i.status === 'new').length;
   const totalBrokerage = transactions.reduce((sum, t) => sum + Number(t.brokerage_amount || 0), 0);
 
+  const filteredProperties = properties.filter(p => {
+    const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.location?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'properties', label: 'Properties', icon: Home },
     { id: 'leads', label: 'Leads', icon: MessageSquare },
     { id: 'transactions', label: 'Revenue', icon: TrendingUp },
   ];
+
+  const getSellerInfo = (sellerId: string | null) => {
+    if (!sellerId) return null;
+    return profiles[sellerId];
+  };
+
+  const ConfirmAction = ({ onConfirm, title, description, children }: { onConfirm: () => void; title: string; description: string; children: React.ReactNode }) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Confirm</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +131,6 @@ const AdminPanel = () => {
             <p className="text-muted-foreground text-sm">Manage properties, leads, and transactions.</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex gap-1 mb-6 bg-muted rounded-lg p-1 overflow-x-auto">
             {tabs.map(t => (
               <button
@@ -122,7 +167,6 @@ const AdminPanel = () => {
                     ))}
                   </div>
 
-                  {/* Recent pending */}
                   <div className="bg-card rounded-xl shadow-card border border-border/50">
                     <div className="p-5 border-b border-border">
                       <h3 className="font-semibold text-foreground">Pending Approvals</h3>
@@ -131,18 +175,26 @@ const AdminPanel = () => {
                       <div className="p-6 text-center text-muted-foreground text-sm">No pending properties</div>
                     ) : (
                       <div className="divide-y divide-border">
-                        {properties.filter(p => p.status === 'pending').slice(0, 5).map(p => (
-                          <div key={p.id} className="p-4 flex items-center justify-between">
-                            <div>
-                              <div className="font-medium text-foreground text-sm">{p.title}</div>
-                              <div className="text-xs text-muted-foreground">{p.location} • {formatPrice(p.price)}</div>
+                        {properties.filter(p => p.status === 'pending').slice(0, 5).map(p => {
+                          const seller = getSellerInfo(p.seller_id);
+                          return (
+                            <div key={p.id} className="p-4 flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-foreground text-sm">{p.title}</div>
+                                <div className="text-xs text-muted-foreground">{p.location} • {formatPrice(p.price)}</div>
+                                {seller && <div className="text-xs text-muted-foreground mt-1">Seller: {seller.name} ({seller.phone || seller.email})</div>}
+                              </div>
+                              <div className="flex gap-2">
+                                <ConfirmAction onConfirm={() => handleApprove(p.id)} title="Approve Property" description={`Approve "${p.title}" and make it visible on the website?`}>
+                                  <Button size="sm" variant="gold">Approve</Button>
+                                </ConfirmAction>
+                                <ConfirmAction onConfirm={() => handleReject(p.id)} title="Reject Property" description={`Reject "${p.title}"? The seller will be notified.`}>
+                                  <Button size="sm" variant="outline">Reject</Button>
+                                </ConfirmAction>
+                              </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="gold" onClick={() => handleApprove(p.id)}>Approve</Button>
-                              <Button size="sm" variant="outline" onClick={() => handleReject(p.id)}>Reject</Button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -151,30 +203,61 @@ const AdminPanel = () => {
 
               {/* Properties */}
               {tab === 'properties' && (
-                <div className="bg-card rounded-xl shadow-card border border-border/50">
-                  <div className="divide-y divide-border">
-                    {properties.map(p => (
-                      <div key={p.id} className="p-4 flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-foreground text-sm truncate">{p.title}</div>
-                          <div className="text-xs text-muted-foreground">{p.location} • {formatPrice(p.price)} • {p.property_type}</div>
-                        </div>
-                        <div className="flex items-center gap-3 ml-4">
-                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                            p.status === 'approved' ? 'bg-success/10 text-success'
-                              : p.status === 'rejected' ? 'bg-destructive/10 text-destructive'
-                              : 'bg-warning/10 text-warning'
-                          }`}>{p.status}</span>
-                          {p.status === 'pending' && (
-                            <div className="flex gap-1">
-                              <Button size="sm" variant="gold" onClick={() => handleApprove(p.id)}>✓</Button>
-                              <Button size="sm" variant="outline" onClick={() => handleReject(p.id)}>✗</Button>
+                <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input placeholder="Search by title or location..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+                    </div>
+                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                      <option value="all">All Status</option>
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+
+                  <div className="bg-card rounded-xl shadow-card border border-border/50">
+                    <div className="divide-y divide-border">
+                      {filteredProperties.map(p => {
+                        const seller = getSellerInfo(p.seller_id);
+                        const thumb = p.images?.[0];
+                        return (
+                          <div key={p.id} className="p-4 flex items-center gap-4">
+                            {thumb && (
+                              <img src={thumb} alt="" className="w-16 h-12 rounded-lg object-cover flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-foreground text-sm truncate">{p.title}</div>
+                              <div className="text-xs text-muted-foreground">{p.location} • {formatPrice(p.price)} • {p.property_type}</div>
+                              {seller && <div className="text-xs text-muted-foreground">Seller: {seller.name}</div>}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {properties.length === 0 && <div className="p-8 text-center text-muted-foreground">No properties</div>}
+                            <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                              <div className="flex items-center gap-2" title={p.visible ? 'Visible on website' : 'Hidden from website'}>
+                                {p.visible ? <Eye className="w-4 h-4 text-success" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                                <Switch checked={p.visible ?? true} onCheckedChange={(v) => toggleVisibility(p.id, v)} />
+                              </div>
+                              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                p.status === 'approved' ? 'bg-success/10 text-success'
+                                  : p.status === 'rejected' ? 'bg-destructive/10 text-destructive'
+                                  : 'bg-warning/10 text-warning'
+                              }`}>{p.status}</span>
+                              {p.status === 'pending' && (
+                                <div className="flex gap-1">
+                                  <ConfirmAction onConfirm={() => handleApprove(p.id)} title="Approve Property" description={`Approve "${p.title}"?`}>
+                                    <Button size="sm" variant="gold">✓</Button>
+                                  </ConfirmAction>
+                                  <ConfirmAction onConfirm={() => handleReject(p.id)} title="Reject Property" description={`Reject "${p.title}"?`}>
+                                    <Button size="sm" variant="outline">✗</Button>
+                                  </ConfirmAction>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {filteredProperties.length === 0 && <div className="p-8 text-center text-muted-foreground">No properties match your filters</div>}
+                    </div>
                   </div>
                 </div>
               )}

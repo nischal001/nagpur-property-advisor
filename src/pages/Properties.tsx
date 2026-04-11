@@ -20,7 +20,7 @@ const Properties = () => {
 
   useEffect(() => {
     const fetchProperties = async () => {
-      let query = supabase.from('properties').select('*').eq('status', 'approved');
+      let query = supabase.from('properties').select('*').eq('status', 'approved').eq('visible', true);
       if (type) query = query.eq('property_type', type);
       if (location) query = query.eq('location', location);
       if (approval) query = query.eq('approval_type', approval);
