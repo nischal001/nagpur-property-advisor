@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X, Phone, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut, hasRole, profile } = useAuth();
 
   const links = [
     { to: '/', label: 'Home' },
     { to: '/properties', label: 'Properties' },
     { to: '/seller', label: 'List Property' },
+    ...(user && hasRole('seller') ? [{ to: '/dashboard', label: 'Dashboard' }] : []),
+    ...(user && hasRole('admin') ? [{ to: '/admin', label: 'Admin' }] : []),
   ];
 
   return (
@@ -25,7 +29,6 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
           {links.map(l => (
             <Link
@@ -43,19 +46,32 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="outline-light" size="sm" asChild>
-            <a href="tel:+919876543210"><Phone className="w-4 h-4 mr-1" /> Call Expert</a>
-          </Button>
-          <Button variant="gold" size="sm">Get Consultation</Button>
+          {user ? (
+            <>
+              <span className="text-xs text-primary-foreground/60 flex items-center gap-1">
+                <User className="w-3 h-3" /> {profile?.name || user.email?.split('@')[0]}
+              </span>
+              <Button variant="outline-light" size="sm" onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-1" /> Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline-light" size="sm" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+              <Button variant="gold" size="sm" asChild>
+                <Link to="/auth">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
-        {/* Mobile toggle */}
         <button className="md:hidden text-primary-foreground" onClick={() => setOpen(!open)}>
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       {open && (
         <div className="md:hidden bg-navy-dark border-t border-navy-light/20 px-4 py-4 space-y-3 animate-fade-in">
           {links.map(l => (
@@ -70,7 +86,15 @@ const Navbar = () => {
               {l.label}
             </Link>
           ))}
-          <Button variant="gold" className="w-full" size="sm">Get Consultation</Button>
+          {user ? (
+            <Button variant="outline-light" className="w-full" size="sm" onClick={() => { signOut(); setOpen(false); }}>
+              <LogOut className="w-4 h-4 mr-1" /> Sign Out
+            </Button>
+          ) : (
+            <Button variant="gold" className="w-full" size="sm" asChild>
+              <Link to="/auth" onClick={() => setOpen(false)}>Sign In / Register</Link>
+            </Button>
+          )}
         </div>
       )}
     </nav>
