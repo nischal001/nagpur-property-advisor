@@ -1,16 +1,28 @@
-import { useState } from 'react';
-import { CheckCircle, ArrowRight, ArrowLeft, Upload } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, ArrowRight, ArrowLeft, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES } from '@/lib/data';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const steps = ['Basic Info', 'Property Details', 'Documents', 'Pricing & Contact'];
 
+const DOC_TYPES = ['7/12 Extract', 'RERA Certificate', 'Layout Approval', 'Sale Deed'] as const;
+
 const SellerRegistration = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, string>>({});
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
     title: '', description: '', propertyType: '', location: '', area: '', approvalType: '',
@@ -21,10 +33,77 @@ const SellerRegistration = () => {
   const next = () => setStep(s => Math.min(s + 1, 3));
   const back = () => setStep(s => Math.max(s - 1, 0));
 
-  const submit = () => {
-    toast.success('Property submitted for review! Our team will contact you within 24 hours.');
-    setStep(0);
-    setForm({ name: '', email: '', phone: '', title: '', description: '', propertyType: '', location: '', area: '', approvalType: '', price: '', contactPhone: '' });
+  const handleDocUpload = async (docType: string, file: File) => {
+    if (!user) {
+      toast.error('Please sign in to upload documents');
+      return;
+    }
+    setUploadingDoc(docType);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${Date.now()}-${docType.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`;
+      const { error } = await supabase.storage.from('property-documents').upload(path, file);
+      if (error) throw error;
+      setUploadedDocs(prev => ({ ...prev, [docType]: path }));
+      toast.success(`${docType} uploaded successfully`);
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setUploadingDoc(null);
+    }
+  };
+
+  const submit = async () => {
+    if (!user) {
+      toast.error('Please sign in to submit a property');
+      navigate('/auth');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Insert property
+      const { data: property, error: propError } = await supabase.from('properties').insert({
+        title: form.title,
+        description: form.description,
+        price: Number(form.price),
+        location: form.location,
+        property_type: form.propertyType,
+        area: Number(form.area),
+        area_unit: 'sq ft',
+        approval_type: form.approvalType || null,
+        seller_id: user.id,
+        status: 'pending',
+      }).select('id').single();
+
+      if (propError) throw propError;
+
+      // Insert document references
+      if (property) {
+        const docInserts = Object.entries(uploadedDocs).map(([type, filePath]) => ({
+          property_id: property.id,
+          type,
+          file_url: filePath,
+          uploaded_by: user.id,
+        }));
+        if (docInserts.length > 0) {
+          await supabase.from('documents').insert(docInserts);
+        }
+      }
+
+      // Ensure seller role
+      await supabase.from('user_roles').upsert(
+        { user_id: user.id, role: 'seller' as const },
+        { onConflict: 'user_id,role' }
+      );
+
+      toast.success('Property submitted for review! Our team will contact you within 24 hours.');
+      navigate('/dashboard');
+    } catch (err: any) {
+      toast.error(err.message || 'Submission failed');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass = "w-full h-11 rounded-lg border border-input bg-background px-4 text-sm focus:ring-2 focus:ring-gold/30 outline-none";
@@ -102,10 +181,40 @@ const SellerRegistration = () => {
             {step === 2 && (
               <div className="space-y-5">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Upload Documents</h3>
-                {['7/12 Extract', 'RERA Certificate', 'Layout Approval', 'Sale Deed / Agreement'].map(doc => (
+                {DOC_TYPES.map(doc => (
                   <div key={doc} className="flex items-center justify-between p-4 border border-dashed border-border rounded-lg hover:border-gold/40 transition-colors">
-                    <span className="text-sm text-foreground">{doc}</span>
-                    <Button variant="outline" size="sm"><Upload className="w-4 h-4 mr-1" /> Upload</Button>
+                    <div className="flex items-center gap-2">
+                      {uploadedDocs[doc] ? (
+                        <CheckCircle className="w-4 h-4 text-success" />
+                      ) : null}
+                      <span className="text-sm text-foreground">{doc}</span>
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        ref={el => { fileInputRefs.current[doc] = el; }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDocUpload(doc, file);
+                        }}
+                      />
+                      <Button
+                        variant={uploadedDocs[doc] ? "outline" : "outline"}
+                        size="sm"
+                        disabled={uploadingDoc === doc}
+                        onClick={() => fileInputRefs.current[doc]?.click()}
+                      >
+                        {uploadingDoc === doc ? (
+                          <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Uploading</>
+                        ) : uploadedDocs[doc] ? (
+                          <><CheckCircle className="w-4 h-4 mr-1" /> Uploaded</>
+                        ) : (
+                          <><Upload className="w-4 h-4 mr-1" /> Upload</>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground">Documents will be verified by our legal team within 48 hours.</p>
@@ -130,7 +239,9 @@ const SellerRegistration = () => {
               {step < 3 ? (
                 <Button variant="gold" onClick={next}>Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
               ) : (
-                <Button variant="gold" onClick={submit}>Submit Property</Button>
+                <Button variant="gold" onClick={submit} disabled={submitting}>
+                  {submitting ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Submitting...</> : 'Submit Property'}
+                </Button>
               )}
             </div>
           </div>

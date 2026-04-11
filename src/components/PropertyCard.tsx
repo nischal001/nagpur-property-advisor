@@ -1,21 +1,27 @@
 import { Link } from 'react-router-dom';
-import { MapPin, ShieldCheck, BadgeCheck } from 'lucide-react';
+import { MapPin, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Property, formatPrice } from '@/lib/data';
+import { Property, formatPrice, getPropertyImage } from '@/lib/data';
 
 interface PropertyCardProps {
   property: Property;
+  index?: number;
 }
 
-const PropertyCard = ({ property }: PropertyCardProps) => (
+const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => (
   <Link
     to={`/property/${property.id}`}
     className="bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 group border border-border/50 hover:border-gold/30 block"
   >
     <div className="relative h-48 bg-muted overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-navy/20 to-navy/60 flex items-center justify-center">
-        <span className="text-primary-foreground/40 text-sm">Property Image</span>
-      </div>
+      <img
+        src={getPropertyImage(property, index)}
+        alt={property.title}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+        width={800}
+        height={600}
+      />
       {property.verified && (
         <div className="absolute top-3 left-3 flex items-center gap-1 bg-success/90 text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full">
           <ShieldCheck className="w-3 h-3" /> Verified
