@@ -153,6 +153,7 @@ export type Database = {
           title_verified: boolean | null
           updated_at: string
           verified: boolean | null
+          visible: boolean
         }
         Insert: {
           approval_type?: string | null
@@ -174,6 +175,7 @@ export type Database = {
           title_verified?: boolean | null
           updated_at?: string
           verified?: boolean | null
+          visible?: boolean
         }
         Update: {
           approval_type?: string | null
@@ -195,6 +197,7 @@ export type Database = {
           title_verified?: boolean | null
           updated_at?: string
           verified?: boolean | null
+          visible?: boolean
         }
         Relationships: []
       }
