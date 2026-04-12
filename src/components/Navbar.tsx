@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Phone, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -48,9 +49,15 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
-              <span className="text-xs text-primary-foreground/60 flex items-center gap-1">
-                <User className="w-3 h-3" /> {profile?.name || user.email?.split('@')[0]}
-              </span>
+              <Avatar className="h-8 w-8 bg-gradient-gold">
+                <AvatarFallback className="bg-gradient-gold text-navy-dark font-semibold text-xs">
+                  {(() => {
+                    const name = profile?.name || user.email?.split('@')[0] || '';
+                    const parts = name.trim().split(/\s+/);
+                    return parts.map(p => p[0]).join('').toUpperCase().slice(0, 2);
+                  })()}
+                </AvatarFallback>
+              </Avatar>
               <Button variant="outline-light" size="sm" onClick={signOut}>
                 <LogOut className="w-4 h-4 mr-1" /> Sign Out
               </Button>
