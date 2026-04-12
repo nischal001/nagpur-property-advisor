@@ -36,7 +36,7 @@ const Footer = () => (
         <div>
           <h4 className="font-serif font-semibold text-primary-foreground mb-4">Contact</h4>
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-gold" /> +91 98765 43210</div>
+            <a href="tel:+917219437006" className="flex items-center gap-2 hover:text-gold transition-colors"><Phone className="w-4 h-4 text-gold" /> +91 72194 37006</a>
             <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-gold" /> info@nagpurproperty.com</div>
             <div className="flex items-start gap-2"><MapPin className="w-4 h-4 text-gold mt-0.5" /> Dharampeth, Nagpur, Maharashtra</div>
           </div>

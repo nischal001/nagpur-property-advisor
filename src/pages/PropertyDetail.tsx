@@ -1,16 +1,70 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { MapPin, ShieldCheck, FileCheck, CheckCircle, XCircle, ArrowLeft, Phone, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
-import { dummyProperties, formatPrice, getPropertyImage } from '@/lib/data';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+const formatPrice = (price: number) => {
+  if (price >= 10000000) return `₹${(price / 10000000).toFixed(2)} Cr`;
+  if (price >= 100000) return `₹${(price / 100000).toFixed(2)} L`;
+  return `₹${price.toLocaleString('en-IN')}`;
+};
 
 const PropertyDetail = () => {
   const { id } = useParams();
-  const property = dummyProperties.find(p => p.id === id);
+  const { user, hasRole } = useAuth();
+  const [property, setProperty] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (!property) {
+  useEffect(() => {
+    const fetchProperty = async () => {
+      if (!id) { setError(true); setLoading(false); return; }
+      const { data, error: err } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (err || !data) {
+        setError(true);
+      } else {
+        // Non-admin users can't see hidden/non-approved properties
+        if (!hasRole('admin') && (data.status !== 'approved' || !data.visible)) {
+          setError(true);
+        } else {
+          setProperty(data);
+        }
+      }
+      setLoading(false);
+    };
+    fetchProperty();
+  }, [id, hasRole]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-20 pb-16 container mx-auto px-4">
+          <Skeleton className="h-8 w-48 mt-4 mb-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-64 md:h-96 w-full rounded-2xl" />
+              <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+            <Skeleton className="h-64 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !property) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -22,8 +76,9 @@ const PropertyDetail = () => {
     );
   }
 
-  const riskColor = property.riskLevel === 'Low' ? 'text-success' : property.riskLevel === 'Medium' ? 'text-warning' : 'text-destructive';
-  const riskBg = property.riskLevel === 'Low' ? 'bg-success/10' : property.riskLevel === 'Medium' ? 'bg-warning/10' : 'bg-destructive/10';
+  const riskColor = property.risk_level === 'Low' ? 'text-success' : property.risk_level === 'Medium' ? 'text-warning' : 'text-destructive';
+  const riskBg = property.risk_level === 'Low' ? 'bg-success/10' : property.risk_level === 'Medium' ? 'bg-warning/10' : 'bg-destructive/10';
+  const imageUrl = property.images?.[0] || '/placeholder.svg';
 
   const VerifyBadge = ({ verified, label }: { verified: boolean; label: string }) => (
     <div className="flex items-center gap-2 py-2">
@@ -44,13 +99,7 @@ const PropertyDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="relative h-64 md:h-96 bg-muted rounded-2xl overflow-hidden">
-                <img
-                  src={getPropertyImage(property)}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                  width={800}
-                  height={600}
-                />
+                <img src={imageUrl} alt={property.title} className="w-full h-full object-cover" />
                 {property.verified && (
                   <div className="absolute top-4 left-4 flex items-center gap-1 bg-success/90 text-primary-foreground text-sm font-medium px-3 py-1.5 rounded-full">
                     <ShieldCheck className="w-4 h-4" /> V-Audit Verified
@@ -67,9 +116,9 @@ const PropertyDetail = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
                     { label: 'Price', value: formatPrice(property.price) },
-                    { label: 'Area', value: `${property.area} ${property.areaUnit}` },
-                    { label: 'Type', value: property.propertyType },
-                    { label: 'Approval', value: property.approvalType },
+                    { label: 'Area', value: `${property.area} ${property.area_unit}` },
+                    { label: 'Type', value: property.property_type },
+                    { label: 'Approval', value: property.approval_type || 'N/A' },
                   ].map(d => (
                     <div key={d.label} className="bg-muted rounded-lg p-4">
                       <div className="text-xs text-muted-foreground mb-1">{d.label}</div>
@@ -84,14 +133,14 @@ const PropertyDetail = () => {
                   <FileCheck className="w-5 h-5 text-gold" /> V-Audit™ Report
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                  <VerifyBadge verified={property.verified} label="NMRDA/NIT Approved" />
-                  <VerifyBadge verified={property.reraRegistered} label="RERA Registered" />
-                  <VerifyBadge verified={property.titleVerified} label="30-Year Title Verified" />
-                  <VerifyBadge verified={property.possessionVerified} label="Possession Verified" />
+                  <VerifyBadge verified={property.verified ?? false} label="NMRDA/NIT Approved" />
+                  <VerifyBadge verified={property.rera_registered ?? false} label="RERA Registered" />
+                  <VerifyBadge verified={property.title_verified ?? false} label="30-Year Title Verified" />
+                  <VerifyBadge verified={property.possession_verified ?? false} label="Possession Verified" />
                 </div>
                 <div className={`mt-4 inline-flex items-center gap-2 ${riskBg} px-4 py-2 rounded-lg`}>
                   <span className="text-sm font-medium text-foreground">Legal Risk:</span>
-                  <span className={`font-bold ${riskColor}`}>{property.riskLevel}</span>
+                  <span className={`font-bold ${riskColor}`}>{property.risk_level}</span>
                 </div>
               </div>
             </div>
@@ -100,7 +149,7 @@ const PropertyDetail = () => {
               <div className="bg-card rounded-xl p-6 shadow-card border border-border/50 sticky top-24">
                 <div className="text-2xl font-bold text-navy mb-1">{formatPrice(property.price)}</div>
                 <div className="text-sm text-muted-foreground mb-6">
-                  {property.area} {property.areaUnit} • {property.propertyType}
+                  {property.area} {property.area_unit} • {property.property_type}
                 </div>
                 <div className="space-y-3">
                   <Button variant="gold" className="w-full" size="lg">
@@ -109,8 +158,10 @@ const PropertyDetail = () => {
                   <Button variant="navy" className="w-full" size="lg">
                     <Download className="w-4 h-4 mr-2" /> Download Report
                   </Button>
-                  <Button variant="outline" className="w-full" size="lg">
-                    <Phone className="w-4 h-4 mr-2" /> Talk to Expert
+                  <Button variant="outline" className="w-full" size="lg" asChild>
+                    <a href="tel:+917219437006">
+                      <Phone className="w-4 h-4 mr-2" /> Talk to Expert
+                    </a>
                   </Button>
                 </div>
                 <div className="mt-6 p-4 bg-muted rounded-lg">
