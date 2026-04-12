@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { dummyProperties, getPropertyImage } from '@/lib/data';
 
 const formatPrice = (price: number) => {
   if (price >= 10000000) return `₹${(price / 10000000).toFixed(2)} Cr`;
