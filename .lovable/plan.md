@@ -1,50 +1,32 @@
 
 
-## Plan: Fix Admin Panel & Enhance Property Management
+## Plan: Avatar Initials, Contact Update, and Live Property Detail
 
-### Problem
-All database requests are currently failing ("Failed to fetch"), which means the admin panel, properties page, and dashboards are non-functional. Additionally, the admin panel needs better property management controls (show/hide on website).
+### 1. User Avatar with Initials (Navbar)
+Replace the plain text username in the navbar with a circular avatar showing the user's initials (first letter of first name + first letter of last name). Use the existing Avatar component from `src/components/ui/avatar.tsx`. Extract initials from `profile.name` or fall back to email. Show in both desktop and mobile views.
 
-### What will be done
+**Files:** `src/components/Navbar.tsx`
 
-**1. Fix Database Connectivity**
-- The "Failed to fetch" errors on all Supabase REST calls suggest a transient connectivity issue or a misconfigured client. Will verify the Supabase URL and anon key are correctly set, and add error handling/retry logic to gracefully handle temporary outages.
+### 2. Update Contact Number
+Change `+91 98765 43210` to `+91 72194 37006` everywhere:
+- `src/components/Footer.tsx` (line 39) — phone display
+- `src/components/WhatsAppButton.tsx` (line 5) — WhatsApp link (`wa.me/917219437006`)
+- Any other phone references found in the codebase
 
-**2. Enhance Admin Panel Property Management**
-- Add a toggle (show/hide) for each property so the admin can control visibility on the website without fully rejecting it.
-- Add a `visible` boolean column to the `properties` table (default `true` for approved properties).
-- Update the Properties listing page to filter by `visible = true` in addition to `status = approved`.
-- Add property detail view in admin (expandable rows showing images, documents, seller info).
-- Add bulk actions (approve/reject multiple).
+**Files:** `src/components/Footer.tsx`, `src/components/WhatsAppButton.tsx`
 
-**3. Improve Admin Panel UX**
-- Show seller name/contact alongside each property listing.
-- Add search/filter within the admin properties tab (by location, type, status).
-- Show property images as thumbnails in the admin list.
-- Add confirmation dialogs for approve/reject actions.
+### 3. Load Property Detail from Database
+Replace the current dummy-data lookup in `PropertyDetail.tsx` with a live Supabase query. Fetch property by ID from the `properties` table. Add loading and error states. Respect visibility rules (admins can see hidden properties, public users cannot).
+
+**Files:** `src/pages/PropertyDetail.tsx`
+
+### 4. Admin Panel Access
+The admin panel is at `/admin` but only shows in the navbar for users with the `admin` role. To access it in preview, either:
+- Navigate directly to `https://id-preview--05833f69-16ed-4d9c-b960-d3c490d296d8.lovable.app/admin`
+- Or after you sign up, I'll assign the admin role to your user account so the link appears in the navbar
 
 ### Technical Details
-
-**Database Migration:**
-```sql
-ALTER TABLE properties ADD COLUMN visible boolean NOT NULL DEFAULT true;
-```
-
-**RLS:** Existing admin policies already cover updates. The properties SELECT policy will be updated:
-```sql
--- Update to also check visible = true for public viewing
-DROP POLICY "Approved properties are viewable by everyone" ON properties;
-CREATE POLICY "Approved visible properties are viewable by everyone"
-  ON properties FOR SELECT
-  USING (
-    (status = 'approved' AND visible = true)
-    OR seller_id = auth.uid()
-    OR has_role(auth.uid(), 'admin')
-  );
-```
-
-**Frontend Changes:**
-- `AdminPanel.tsx`: Add Switch toggle per property row for visibility, add search input, show seller info via join with profiles table, add confirmation dialog.
-- `Properties.tsx`: Add `.eq('visible', true)` to the query filter.
-- `PropertyDetail.tsx`: Check `visible` flag and show 404 for hidden properties (unless admin).
+- Avatar: Use `<Avatar>` + `<AvatarFallback>` with initials extracted via `name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)`
+- Property detail query: `supabase.from('properties').select('*').eq('id', id).single()` with visibility check for non-admin users
+- Add `useState`/`useEffect` for async fetch with loading skeleton
 
