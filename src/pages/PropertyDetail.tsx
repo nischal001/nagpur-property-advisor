@@ -26,6 +26,7 @@ const PropertyDetail = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       if (!id) { setError(true); setLoading(false); return; }
+      
       const { data, error: err } = await supabase
         .from('properties')
         .select('*')
@@ -33,9 +34,23 @@ const PropertyDetail = () => {
         .single();
 
       if (err || !data) {
-        setError(true);
+        // Fallback to dummy data (e.g. when DB fetch fails in preview)
+        const dummy = dummyProperties.find(p => p.id === id);
+        if (dummy) {
+          setProperty({
+            ...dummy,
+            property_type: dummy.propertyType,
+            area_unit: dummy.areaUnit,
+            approval_type: dummy.approvalType,
+            risk_level: dummy.riskLevel,
+            rera_registered: dummy.reraRegistered,
+            title_verified: dummy.titleVerified,
+            possession_verified: dummy.possessionVerified,
+          });
+        } else {
+          setError(true);
+        }
       } else {
-        // Non-admin users can't see hidden/non-approved properties
         if (!hasRole('admin') && (data.status !== 'approved' || !data.visible)) {
           setError(true);
         } else {
