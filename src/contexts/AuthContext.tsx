@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
   const [loading, setLoading] = useState(true);
+  const initialAuthResolved = useRef(false);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -42,49 +43,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // First restore session from local storage
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        // Build profile from user metadata as fallback
-        const meta = session.user.user_metadata;
-        if (meta?.name || meta?.full_name) {
-          setProfile({
-            name: meta.full_name || meta.name || '',
-            email: session.user.email ?? null,
-            phone: meta.phone ?? null,
-          });
-        }
-        fetchUserData(session.user.id);
-      }
-      setLoading(false);
-    });
+    let isMounted = true;
 
-    // Then listen for subsequent auth changes
+    const applySession = (nextSession: Session | null) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        const meta = nextSession.user.user_metadata;
+        setRoles([]);
+        setProfile({
+          name: meta?.full_name || meta?.name || '',
+          email: nextSession.user.email ?? null,
+          phone: typeof meta?.phone === 'string' ? meta.phone : null,
+        });
+        setTimeout(() => {
+          void fetchUserData(nextSession.user.id);
+        }, 0);
+      } else {
+        setRoles([]);
+        setProfile(null);
+      }
+
+      setLoading(false);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const meta = session.user.user_metadata;
-          if (meta?.name || meta?.full_name) {
-            setProfile({
-              name: meta.full_name || meta.name || '',
-              email: session.user.email ?? null,
-              phone: meta.phone ?? null,
-            });
-          }
-          setTimeout(() => fetchUserData(session.user.id), 0);
-        } else {
-          setRoles([]);
-          setProfile(null);
-        }
-        setLoading(false);
+      (_event, nextSession) => {
+        initialAuthResolved.current = true;
+        applySession(nextSession);
       }
     );
 
-    return () => subscription.unsubscribe();
+    supabase.auth.getSession().then(({ data: { session: nextSession } }) => {
+      if (initialAuthResolved.current) return;
+      applySession(nextSession);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
