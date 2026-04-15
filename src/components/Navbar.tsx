@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut, hasRole, profile } = useAuth();
+  const { user, signOut, hasRole, profile, loading } = useAuth();
 
   const links = [
     { to: '/', label: 'Home' },
