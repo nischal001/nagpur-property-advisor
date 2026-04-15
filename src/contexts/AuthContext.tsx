@@ -21,6 +21,20 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const hasOAuthCallbackParams = () => {
+  if (typeof window === 'undefined') return false;
+
+  const url = new URL(window.location.href);
+  return (
+    url.searchParams.has('code') ||
+    url.searchParams.has('access_token') ||
+    url.hash.includes('access_token') ||
+    url.hash.includes('refresh_token')
+  );
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -70,6 +84,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     };
 
+    const syncSession = async (withRetry = false) => {
+      const attempts = withRetry ? 6 : 1;
+
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        const { data: { session: nextSession } } = await supabase.auth.getSession();
+
+        if (nextSession?.user || attempt === attempts - 1) {
+          initialAuthResolved.current = true;
+          applySession(nextSession);
+          return;
+        }
+
+        await wait(250);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => {
         initialAuthResolved.current = true;
@@ -77,14 +107,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session: nextSession } }) => {
-      if (initialAuthResolved.current) return;
-      applySession(nextSession);
-    });
+    void syncSession(hasOAuthCallbackParams());
+
+    const handleWindowFocus = () => {
+      if (!initialAuthResolved.current) return;
+      void syncSession(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleWindowFocus();
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
