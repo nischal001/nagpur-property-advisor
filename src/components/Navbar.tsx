@@ -18,6 +18,12 @@ const Navbar = () => {
     ...(user && hasRole('admin') ? [{ to: '/admin', label: 'Admin' }] : []),
   ];
 
+  const initials = (() => {
+    const name = profile?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    return parts.map((part) => part[0]).join('').toUpperCase().slice(0, 2) || 'U';
+  })();
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-navy-dark/95 backdrop-blur-md border-b border-navy-light/20">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -31,7 +37,7 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          {links.map(l => (
+          {links.map((l) => (
             <Link
               key={l.to}
               to={l.to}
@@ -51,11 +57,7 @@ const Navbar = () => {
             <>
               <Avatar className="h-8 w-8 bg-gradient-gold">
                 <AvatarFallback className="bg-gradient-gold text-navy-dark font-semibold text-xs">
-                  {(() => {
-                    const name = profile?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '';
-                    const parts = name.trim().split(/\s+/);
-                    return parts.map(p => p[0]).join('').toUpperCase().slice(0, 2);
-                  })()}
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <Button variant="outline-light" size="sm" onClick={signOut}>
@@ -81,7 +83,7 @@ const Navbar = () => {
 
       {open && (
         <div className="md:hidden bg-navy-dark border-t border-navy-light/20 px-4 py-4 space-y-3 animate-fade-in">
-          {links.map(l => (
+          {links.map((l) => (
             <Link
               key={l.to}
               to={l.to}
@@ -93,7 +95,7 @@ const Navbar = () => {
               {l.label}
             </Link>
           ))}
-          {user ? (
+          {loading ? null : user ? (
             <Button variant="outline-light" className="w-full" size="sm" onClick={() => { signOut(); setOpen(false); }}>
               <LogOut className="w-4 h-4 mr-1" /> Sign Out
             </Button>
