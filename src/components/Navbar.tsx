@@ -47,12 +47,12 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          {user ? (
+          {loading ? null : user ? (
             <>
               <Avatar className="h-8 w-8 bg-gradient-gold">
                 <AvatarFallback className="bg-gradient-gold text-navy-dark font-semibold text-xs">
                   {(() => {
-                    const name = profile?.name || user.email?.split('@')[0] || '';
+                    const name = profile?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '';
                     const parts = name.trim().split(/\s+/);
                     return parts.map(p => p[0]).join('').toUpperCase().slice(0, 2);
                   })()}
