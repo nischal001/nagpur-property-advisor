@@ -34,14 +34,11 @@ const SellerRegistration = () => {
   const back = () => setStep(s => Math.max(s - 1, 0));
 
   const handleDocUpload = async (docType: string, file: File) => {
-    if (!user) {
-      toast.error('Please sign in to upload documents');
-      return;
-    }
     setUploadingDoc(docType);
     try {
       const ext = file.name.split('.').pop();
-      const path = `${user.id}/${Date.now()}-${docType.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`;
+      const ownerId = user?.id ?? 'guest';
+      const path = `${ownerId}/${Date.now()}-${docType.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`;
       const { error } = await supabase.storage.from('property-documents').upload(path, file);
       if (error) throw error;
       setUploadedDocs(prev => ({ ...prev, [docType]: path }));
@@ -54,15 +51,9 @@ const SellerRegistration = () => {
   };
 
   const submit = async () => {
-    if (!user) {
-      toast.error('Please sign in to submit a property');
-      navigate('/auth');
-      return;
-    }
-
     setSubmitting(true);
     try {
-      // Insert property
+      // Insert property (seller_id is null for guest submissions)
       const { data: property, error: propError } = await supabase.from('properties').insert({
         title: form.title,
         description: form.description,
@@ -72,7 +63,7 @@ const SellerRegistration = () => {
         area: Number(form.area),
         area_unit: 'sq ft',
         approval_type: form.approvalType || null,
-        seller_id: user.id,
+        seller_id: user?.id ?? null,
         status: 'pending',
       }).select('id').single();
 
@@ -84,21 +75,23 @@ const SellerRegistration = () => {
           property_id: property.id,
           type,
           file_url: filePath,
-          uploaded_by: user.id,
+          uploaded_by: user?.id ?? null,
         }));
         if (docInserts.length > 0) {
           await supabase.from('documents').insert(docInserts);
         }
       }
 
-      // Ensure seller role
-      await supabase.from('user_roles').upsert(
-        { user_id: user.id, role: 'seller' as const },
-        { onConflict: 'user_id,role' }
-      );
+      // Ensure seller role for signed-in users
+      if (user) {
+        await supabase.from('user_roles').upsert(
+          { user_id: user.id, role: 'seller' as const },
+          { onConflict: 'user_id,role' }
+        );
+      }
 
       toast.success('Property submitted for review! Our team will contact you within 24 hours.');
-      navigate('/dashboard');
+      navigate(user ? '/dashboard' : '/');
     } catch (err: any) {
       toast.error(err.message || 'Submission failed');
     } finally {
@@ -226,9 +219,6 @@ const SellerRegistration = () => {
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Pricing & Contact</h3>
                 <div><label className={labelClass}>Expected Price (₹)</label><input className={inputClass} type="number" value={form.price} onChange={e => update('price', e.target.value)} placeholder="e.g. 5000000" /></div>
                 <div><label className={labelClass}>Contact Phone</label><input className={inputClass} value={form.contactPhone} onChange={e => update('contactPhone', e.target.value)} placeholder="+91 98765 43210" /></div>
-                <div className="bg-muted rounded-lg p-4">
-                  <p className="text-sm text-muted-foreground">✅ Our brokerage is just <strong className="text-foreground">2%</strong> of the transaction value. No upfront charges.</p>
-                </div>
               </div>
             )}
 
