@@ -53,8 +53,11 @@ const SellerRegistration = () => {
   const submit = async () => {
     setSubmitting(true);
     try {
+      const propertyId = crypto.randomUUID();
+
       // Insert property (seller_id is null for guest submissions)
-      const { data: property, error: propError } = await supabase.from('properties').insert({
+      const { error: propError } = await supabase.from('properties').insert({
+        id: propertyId,
         title: form.title,
         description: form.description,
         price: Number(form.price),
@@ -65,20 +68,21 @@ const SellerRegistration = () => {
         approval_type: form.approvalType || null,
         seller_id: user?.id ?? null,
         status: 'pending',
-      }).select('id').single();
+      });
 
       if (propError) throw propError;
 
       // Insert document references
-      if (property) {
+      {
         const docInserts = Object.entries(uploadedDocs).map(([type, filePath]) => ({
-          property_id: property.id,
+          property_id: propertyId,
           type,
           file_url: filePath,
           uploaded_by: user?.id ?? null,
         }));
         if (docInserts.length > 0) {
-          await supabase.from('documents').insert(docInserts);
+          const { error: docsError } = await supabase.from('documents').insert(docInserts);
+          if (docsError) throw docsError;
         }
       }
 
