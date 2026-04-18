@@ -1,1 +1,4 @@
 project_id = "wzgkszbcthviiwaqzmiv"
+
+[functions.submit-property]
+verify_jwt = false
