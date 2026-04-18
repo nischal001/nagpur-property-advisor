@@ -112,7 +112,11 @@ const SellerRegistration = () => {
       toast.success('Property submitted for review! Our team will contact you within 24 hours.');
       navigate(user ? '/dashboard' : '/');
     } catch (err: any) {
-      toast.error(err.message || 'Submission failed');
+      console.error('Submission error:', err);
+      const msg = err?.message === 'Failed to fetch'
+        ? 'Network error — please check your internet connection or try disabling ad-blockers.'
+        : (err?.message || 'Submission failed');
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
