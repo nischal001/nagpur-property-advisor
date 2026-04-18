@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,7 +60,11 @@ Deno.serve(async (req) => {
       });
 
     if (uploadError) {
-      throw uploadError;
+      console.error("Storage upload error:", uploadError);
+      return new Response(JSON.stringify({ error: uploadError.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify({ success: true, path: storagePath }), {
