@@ -51,6 +51,18 @@ const SellerRegistration = () => {
   };
 
   const submit = async () => {
+    // Validate required fields before submitting
+    const missing: string[] = [];
+    if (!form.title.trim()) missing.push('Property Title');
+    if (!form.location) missing.push('Location');
+    if (!form.propertyType) missing.push('Property Type');
+    if (!form.area || Number.isNaN(Number(form.area)) || Number(form.area) <= 0) missing.push('Area');
+    if (!form.price || Number.isNaN(Number(form.price)) || Number(form.price) <= 0) missing.push('Price');
+    if (missing.length > 0) {
+      toast.error(`Please fill: ${missing.join(', ')}`);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const propertyId = crypto.randomUUID();
@@ -70,7 +82,10 @@ const SellerRegistration = () => {
         status: 'pending',
       });
 
-      if (propError) throw propError;
+      if (propError) {
+        console.error('Property insert error:', propError);
+        throw propError;
+      }
 
       // Insert document references
       {
