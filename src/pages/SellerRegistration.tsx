@@ -65,41 +65,28 @@ const SellerRegistration = () => {
 
     setSubmitting(true);
     try {
-      const propertyId = crypto.randomUUID();
-
-      // Insert property (seller_id is null for guest submissions)
-      const { error: propError } = await supabase.from('properties').insert({
-        id: propertyId,
-        title: form.title,
-        description: form.description,
-        price: Number(form.price),
-        location: form.location,
-        property_type: form.propertyType,
-        area: Number(form.area),
-        area_unit: 'sq ft',
-        approval_type: form.approvalType || null,
-        seller_id: user?.id ?? null,
-        status: 'pending',
+      // Use edge function to bypass any client-side blockers (extensions, ad-blockers
+      // intercepting Supabase REST URLs). Service-role insert handles property + docs atomically.
+      const documents = Object.entries(uploadedDocs).map(([type, file_url]) => ({ type, file_url }));
+      const { data, error: fnError } = await supabase.functions.invoke('submit-property', {
+        body: {
+          title: form.title,
+          description: form.description,
+          price: Number(form.price),
+          location: form.location,
+          property_type: form.propertyType,
+          area: Number(form.area),
+          approval_type: form.approvalType || null,
+          seller_id: user?.id ?? null,
+          documents,
+        },
       });
 
-      if (propError) {
-        console.error('Property insert error:', propError);
-        throw propError;
+      if (fnError) {
+        console.error('submit-property error:', fnError);
+        throw fnError;
       }
-
-      // Insert document references
-      {
-        const docInserts = Object.entries(uploadedDocs).map(([type, filePath]) => ({
-          property_id: propertyId,
-          type,
-          file_url: filePath,
-          uploaded_by: user?.id ?? null,
-        }));
-        if (docInserts.length > 0) {
-          const { error: docsError } = await supabase.from('documents').insert(docInserts);
-          if (docsError) throw docsError;
-        }
-      }
+      if (data?.error) throw new Error(data.error);
 
       // Ensure seller role for signed-in users
       if (user) {
