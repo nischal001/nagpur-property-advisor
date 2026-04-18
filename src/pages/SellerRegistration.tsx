@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 const steps = ['Basic Info', 'Property Details', 'Documents', 'Pricing & Contact'];
 
 const DOC_TYPES = ['7/12 Extract', 'RERA Certificate', 'Layout Approval', 'Sale Deed'] as const;
+const ALLOWED_DOC_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+const MAX_DOC_SIZE = 20 * 1024 * 1024;
 
 const SellerRegistration = () => {
   const { user } = useAuth();
@@ -34,14 +36,35 @@ const SellerRegistration = () => {
   const back = () => setStep(s => Math.max(s - 1, 0));
 
   const handleDocUpload = async (docType: string, file: File) => {
+    if (!ALLOWED_DOC_TYPES.includes(file.type)) {
+      toast.error('Only PDF, JPG, and PNG files are allowed');
+      return;
+    }
+
+    if (file.size > MAX_DOC_SIZE) {
+      toast.error('File size must be under 20MB');
+      return;
+    }
+
     setUploadingDoc(docType);
     try {
-      const ext = file.name.split('.').pop();
-      const ownerId = user?.id ?? 'guest';
-      const path = `${ownerId}/${Date.now()}-${docType.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`;
-      const { error } = await supabase.storage.from('property-documents').upload(path, file);
+      const formData = new FormData();
+      formData.append('document', file);
+      formData.append('docType', docType);
+      if (user?.id) {
+        formData.append('sellerId', user.id);
+      }
+
+      const { data, error } = await supabase.functions.invoke('upload-property-document', {
+        body: formData,
+      });
+
       if (error) throw error;
-      setUploadedDocs(prev => ({ ...prev, [docType]: path }));
+      if (data?.error || !data?.path) {
+        throw new Error(data?.error || 'Upload failed');
+      }
+
+      setUploadedDocs(prev => ({ ...prev, [docType]: data.path }));
       toast.success(`${docType} uploaded successfully`);
     } catch (err: any) {
       toast.error(err.message || 'Upload failed');
@@ -200,7 +223,8 @@ const SellerRegistration = () => {
                         accept=".pdf,.jpg,.jpeg,.png"
                         onChange={e => {
                           const file = e.target.files?.[0];
-                          if (file) handleDocUpload(doc, file);
+                            if (file) handleDocUpload(doc, file);
+                            e.target.value = '';
                         }}
                       />
                       <Button

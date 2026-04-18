@@ -2,3 +2,6 @@ project_id = "wzgkszbcthviiwaqzmiv"
 
 [functions.submit-property]
 verify_jwt = false
+
+[functions.upload-property-document]
+verify_jwt = false
