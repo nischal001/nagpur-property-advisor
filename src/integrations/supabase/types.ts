@@ -149,6 +149,9 @@ export type Database = {
           risk_level: string | null
           seller_id: string | null
           status: string
+          submitter_email: string | null
+          submitter_name: string | null
+          submitter_phone: string | null
           title: string
           title_verified: boolean | null
           updated_at: string
@@ -171,6 +174,9 @@ export type Database = {
           risk_level?: string | null
           seller_id?: string | null
           status?: string
+          submitter_email?: string | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
           title: string
           title_verified?: boolean | null
           updated_at?: string
@@ -193,6 +199,9 @@ export type Database = {
           risk_level?: string | null
           seller_id?: string | null
           status?: string
+          submitter_email?: string | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
           title?: string
           title_verified?: boolean | null
           updated_at?: string

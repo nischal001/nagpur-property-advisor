@@ -16,6 +16,21 @@ const DOC_TYPES = ['7/12 Extract', 'RERA Certificate', 'Layout Approval', 'Sale 
 const ALLOWED_DOC_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 const MAX_DOC_SIZE = 20 * 1024 * 1024;
 
+const formatINR = (val: string) => {
+  const digits = val.replace(/\D/g, '');
+  if (!digits) return '';
+  return Number(digits).toLocaleString('en-IN');
+};
+
+const inrToWords = (val: string) => {
+  const n = Number(val.replace(/\D/g, ''));
+  if (!n) return '';
+  if (n >= 1e7) return `₹ ${(n / 1e7).toFixed(2)} Crore`;
+  if (n >= 1e5) return `₹ ${(n / 1e5).toFixed(2)} Lakh`;
+  if (n >= 1e3) return `₹ ${(n / 1e3).toFixed(2)} Thousand`;
+  return `₹ ${n}`;
+};
+
 const SellerRegistration = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -101,6 +116,9 @@ const SellerRegistration = () => {
           area: Number(form.area),
           approval_type: form.approvalType || null,
           seller_id: user?.id ?? null,
+          submitter_name: form.name || null,
+          submitter_phone: form.contactPhone || form.phone || null,
+          submitter_email: form.email || null,
           documents,
         },
       });
@@ -185,10 +203,24 @@ const SellerRegistration = () => {
                   </div>
                   <div>
                     <label className={labelClass}>Location</label>
-                    <select className={inputClass} value={form.location} onChange={e => update('location', e.target.value)}>
+                    <select
+                      className={inputClass}
+                      value={LOCATIONS.includes(form.location as any) ? form.location : (form.location ? '__other__' : '')}
+                      onChange={e => update('location', e.target.value === '__other__' ? ' ' : e.target.value)}
+                    >
                       <option value="">Select</option>
                       {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
+                      <option value="__other__">Other (enter manually)</option>
                     </select>
+                    {form.location !== '' && !LOCATIONS.includes(form.location as any) && (
+                      <input
+                        className={`${inputClass} mt-2`}
+                        placeholder="Enter location"
+                        value={form.location.trim()}
+                        onChange={e => update('location', e.target.value)}
+                        autoFocus
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -251,7 +283,19 @@ const SellerRegistration = () => {
             {step === 3 && (
               <div className="space-y-5">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Pricing & Contact</h3>
-                <div><label className={labelClass}>Expected Price (₹)</label><input className={inputClass} type="number" value={form.price} onChange={e => update('price', e.target.value)} placeholder="e.g. 5000000" /></div>
+                <div>
+                  <label className={labelClass}>Expected Price (₹)</label>
+                  <input
+                    className={inputClass}
+                    inputMode="numeric"
+                    value={form.price ? formatINR(form.price) : ''}
+                    onChange={e => update('price', e.target.value.replace(/\D/g, ''))}
+                    placeholder="e.g. 50,00,000"
+                  />
+                  {form.price && (
+                    <p className="text-xs text-muted-foreground mt-1">{inrToWords(form.price)}</p>
+                  )}
+                </div>
                 <div><label className={labelClass}>Contact Phone</label><input className={inputClass} value={form.contactPhone} onChange={e => update('contactPhone', e.target.value)} placeholder="+91 98765 43210" /></div>
               </div>
             )}

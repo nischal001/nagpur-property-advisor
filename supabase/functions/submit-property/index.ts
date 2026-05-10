@@ -20,6 +20,9 @@ interface SubmitPayload {
   area: number;
   approval_type?: string | null;
   seller_id?: string | null;
+  submitter_name?: string | null;
+  submitter_phone?: string | null;
+  submitter_email?: string | null;
   documents?: DocPayload[];
 }
 
@@ -55,6 +58,9 @@ Deno.serve(async (req) => {
       area_unit: "sq ft",
       approval_type: body.approval_type ?? null,
       seller_id: body.seller_id ?? null,
+      submitter_name: body.submitter_name ?? null,
+      submitter_phone: body.submitter_phone ?? null,
+      submitter_email: body.submitter_email ?? null,
       status: "pending",
     });
 
