@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, Users, Home, CheckCircle, XCircle, Clock, MessageSquare, TrendingUp, Shield, Search, Eye, EyeOff } from 'lucide-react';
+import { BarChart3, Users, Home, CheckCircle, XCircle, Clock, MessageSquare, TrendingUp, Shield, Search, Eye, EyeOff, Pencil } from 'lucide-react';
+import EditPropertyDialog from '@/components/admin/EditPropertyDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
