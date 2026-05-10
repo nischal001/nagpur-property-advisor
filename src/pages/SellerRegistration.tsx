@@ -101,6 +101,9 @@ const SellerRegistration = () => {
           area: Number(form.area),
           approval_type: form.approvalType || null,
           seller_id: user?.id ?? null,
+          submitter_name: form.name || null,
+          submitter_phone: form.contactPhone || form.phone || null,
+          submitter_email: form.email || null,
           documents,
         },
       });
