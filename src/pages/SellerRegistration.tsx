@@ -283,7 +283,19 @@ const SellerRegistration = () => {
             {step === 3 && (
               <div className="space-y-5">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Pricing & Contact</h3>
-                <div><label className={labelClass}>Expected Price (₹)</label><input className={inputClass} type="number" value={form.price} onChange={e => update('price', e.target.value)} placeholder="e.g. 5000000" /></div>
+                <div>
+                  <label className={labelClass}>Expected Price (₹)</label>
+                  <input
+                    className={inputClass}
+                    inputMode="numeric"
+                    value={form.price ? formatINR(form.price) : ''}
+                    onChange={e => update('price', e.target.value.replace(/\D/g, ''))}
+                    placeholder="e.g. 50,00,000"
+                  />
+                  {form.price && (
+                    <p className="text-xs text-muted-foreground mt-1">{inrToWords(form.price)}</p>
+                  )}
+                </div>
                 <div><label className={labelClass}>Contact Phone</label><input className={inputClass} value={form.contactPhone} onChange={e => update('contactPhone', e.target.value)} placeholder="+91 98765 43210" /></div>
               </div>
             )}
