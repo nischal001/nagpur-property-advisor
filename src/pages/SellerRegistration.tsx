@@ -16,6 +16,21 @@ const DOC_TYPES = ['7/12 Extract', 'RERA Certificate', 'Layout Approval', 'Sale 
 const ALLOWED_DOC_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 const MAX_DOC_SIZE = 20 * 1024 * 1024;
 
+const formatINR = (val: string) => {
+  const digits = val.replace(/\D/g, '');
+  if (!digits) return '';
+  return Number(digits).toLocaleString('en-IN');
+};
+
+const inrToWords = (val: string) => {
+  const n = Number(val.replace(/\D/g, ''));
+  if (!n) return '';
+  if (n >= 1e7) return `₹ ${(n / 1e7).toFixed(2)} Crore`;
+  if (n >= 1e5) return `₹ ${(n / 1e5).toFixed(2)} Lakh`;
+  if (n >= 1e3) return `₹ ${(n / 1e3).toFixed(2)} Thousand`;
+  return `₹ ${n}`;
+};
+
 const SellerRegistration = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
