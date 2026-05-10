@@ -20,6 +20,9 @@ interface SubmitPayload {
   area: number;
   approval_type?: string | null;
   seller_id?: string | null;
+  submitter_name?: string | null;
+  submitter_phone?: string | null;
+  submitter_email?: string | null;
   documents?: DocPayload[];
 }
 
