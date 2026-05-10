@@ -27,6 +27,7 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [editing, setEditing] = useState<any>(null);
 
   useEffect(() => {
     const load = async () => {
