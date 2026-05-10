@@ -318,6 +318,13 @@ const AdminPanel = () => {
         </div>
       </div>
       <Footer />
+      <EditPropertyDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        property={editing}
+        seller={editing ? getSellerInfo(editing.seller_id) : null}
+        onSaved={(updated) => setProperties(prev => prev.map(p => p.id === updated.id ? { ...p, ...updated } : p))}
+      />
     </div>
   );
 };
