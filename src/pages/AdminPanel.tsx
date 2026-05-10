@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, Users, Home, CheckCircle, XCircle, Clock, MessageSquare, TrendingUp, Shield, Search, Eye, EyeOff } from 'lucide-react';
+import { BarChart3, Users, Home, CheckCircle, XCircle, Clock, MessageSquare, TrendingUp, Shield, Search, Eye, EyeOff, Pencil } from 'lucide-react';
+import EditPropertyDialog from '@/components/admin/EditPropertyDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -26,6 +27,7 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [editing, setEditing] = useState<any>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -230,7 +232,7 @@ const AdminPanel = () => {
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-foreground text-sm truncate">{p.title}</div>
                               <div className="text-xs text-muted-foreground">{p.location} • {formatPrice(p.price)} • {p.property_type}</div>
-                              {seller && <div className="text-xs text-muted-foreground">Seller: {seller.name}</div>}
+                              {seller && <div className="text-xs text-muted-foreground">Seller: {seller.name} • {seller.email || seller.phone || '—'}</div>}
                             </div>
                             <div className="flex items-center gap-3 ml-4 flex-shrink-0">
                               <div className="flex items-center gap-2" title={p.visible ? 'Visible on website' : 'Hidden from website'}>
@@ -242,6 +244,9 @@ const AdminPanel = () => {
                                   : p.status === 'rejected' ? 'bg-destructive/10 text-destructive'
                                   : 'bg-warning/10 text-warning'
                               }`}>{p.status}</span>
+                              <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
+                                <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                              </Button>
                               {p.status === 'pending' && (
                                 <div className="flex gap-1">
                                   <ConfirmAction onConfirm={() => handleApprove(p.id)} title="Approve Property" description={`Approve "${p.title}"?`}>
@@ -313,6 +318,13 @@ const AdminPanel = () => {
         </div>
       </div>
       <Footer />
+      <EditPropertyDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        property={editing}
+        seller={editing ? getSellerInfo(editing.seller_id) : null}
+        onSaved={(updated) => setProperties(prev => prev.map(p => p.id === updated.id ? { ...p, ...updated } : p))}
+      />
     </div>
   );
 };
