@@ -203,10 +203,24 @@ const SellerRegistration = () => {
                   </div>
                   <div>
                     <label className={labelClass}>Location</label>
-                    <select className={inputClass} value={form.location} onChange={e => update('location', e.target.value)}>
+                    <select
+                      className={inputClass}
+                      value={LOCATIONS.includes(form.location as any) ? form.location : (form.location ? '__other__' : '')}
+                      onChange={e => update('location', e.target.value === '__other__' ? ' ' : e.target.value)}
+                    >
                       <option value="">Select</option>
                       {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
+                      <option value="__other__">Other (enter manually)</option>
                     </select>
+                    {form.location !== '' && !LOCATIONS.includes(form.location as any) && (
+                      <input
+                        className={`${inputClass} mt-2`}
+                        placeholder="Enter location"
+                        value={form.location.trim()}
+                        onChange={e => update('location', e.target.value)}
+                        autoFocus
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
