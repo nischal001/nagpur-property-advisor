@@ -21,7 +21,7 @@ const EMPTY = {
   title: '', description: '', price: 0, location: '', property_type: '',
   area: 0, area_unit: 'sq ft', approval_type: '', status: 'pending',
   risk_level: 'Medium', verified: false, rera_registered: false,
-  title_verified: false, possession_verified: false, visible: true, images: [] as string[],
+  title_verified: false, possession_verified: false, visible: true, sold_out: false, images: [] as string[],
 };
 
 const EditPropertyDialog = ({ open, onClose, property, seller, onSaved }: Props) => {
@@ -175,6 +175,7 @@ const EditPropertyDialog = ({ open, onClose, property, seller, onSaved }: Props)
               { k: 'title_verified', label: 'Title Verified' },
               { k: 'possession_verified', label: 'Possession Verified' },
               { k: 'visible', label: 'Visible on Website' },
+              { k: 'sold_out', label: 'Mark as Sold Out' },
             ].map(({ k, label }) => (
               <div key={k} className="flex items-center justify-between gap-2">
                 <Label className="text-xs">{label}</Label>
