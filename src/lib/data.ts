@@ -24,6 +24,7 @@ export interface Property {
   images: string[];
   sellerId: string;
   createdAt: string;
+  soldOut?: boolean;
 }
 
 export const LOCATIONS = [

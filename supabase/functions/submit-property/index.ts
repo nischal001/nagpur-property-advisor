@@ -23,6 +23,7 @@ interface SubmitPayload {
   submitter_name?: string | null;
   submitter_phone?: string | null;
   submitter_email?: string | null;
+  images?: string[];
   documents?: DocPayload[];
 }
 
@@ -61,6 +62,7 @@ Deno.serve(async (req) => {
       submitter_name: body.submitter_name ?? null,
       submitter_phone: body.submitter_phone ?? null,
       submitter_email: body.submitter_email ?? null,
+      images: Array.isArray(body.images) ? body.images : [],
       status: "pending",
     });
 

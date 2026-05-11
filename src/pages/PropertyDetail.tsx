@@ -1,14 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { MapPin, ShieldCheck, FileCheck, CheckCircle, XCircle, ArrowLeft, Phone, Download, Calendar } from 'lucide-react';
+import { MapPin, ShieldCheck, FileCheck, CheckCircle, XCircle, ArrowLeft, Phone, Download, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { dummyProperties, getPropertyImage } from '@/lib/data';
+import { timeAgo } from '@/lib/timeAgo';
 
 const formatPrice = (price: number) => {
   if (price >= 10000000) return `₹${(price / 10000000).toFixed(2)} Cr`;
@@ -103,8 +105,31 @@ const PropertyDetail = () => {
     </div>
   );
 
+  const listingLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: property.title,
+    description: property.description,
+    image: imageUrl,
+    offers: {
+      '@type': 'Offer',
+      price: property.price,
+      priceCurrency: 'INR',
+      availability: property.sold_out ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+    },
+    category: property.property_type,
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${property.title} — Nagpur`}
+        description={(property.description || `${property.property_type} in ${property.location}, Nagpur. ${property.area} ${property.area_unit}. ${property.approval_type || ''}`).slice(0, 160)}
+        canonical={`/property/${property.id}`}
+        image={imageUrl}
+        type="product"
+        jsonLd={listingLd}
+      />
       <Navbar />
       <div className="pt-20 pb-16">
         <div className="container mx-auto px-4">
@@ -115,8 +140,15 @@ const PropertyDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="relative h-64 md:h-96 bg-muted rounded-2xl overflow-hidden">
-                <img src={imageUrl} alt={property.title} className="w-full h-full object-cover" />
-                {property.verified && (
+                <img src={imageUrl} alt={`${property.title} in ${property.location}, Nagpur`} className={`w-full h-full object-cover ${property.sold_out ? 'opacity-60 grayscale' : ''}`} />
+                {property.sold_out && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-destructive text-destructive-foreground text-2xl font-bold px-8 py-3 rounded-full uppercase tracking-widest rotate-[-8deg] shadow-2xl">
+                      Sold Out
+                    </div>
+                  </div>
+                )}
+                {property.verified && !property.sold_out && (
                   <div className="absolute top-4 left-4 flex items-center gap-1 bg-success/90 text-primary-foreground text-sm font-medium px-3 py-1.5 rounded-full">
                     <ShieldCheck className="w-4 h-4" /> V-Audit Verified
                   </div>
@@ -124,8 +156,14 @@ const PropertyDetail = () => {
               </div>
 
               <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-                  <MapPin className="w-4 h-4" /> {property.location}, Nagpur
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-sm mb-2">
+                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {property.location}, Nagpur</span>
+                  {property.created_at && (
+                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> Listed {timeAgo(property.created_at)}</span>
+                  )}
+                  {property.sold_out && (
+                    <span className="text-destructive font-semibold uppercase text-xs tracking-wider">Sold Out</span>
+                  )}
                 </div>
                 <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">{property.title}</h1>
                 <p className="text-muted-foreground leading-relaxed mb-6">{property.description}</p>
@@ -168,12 +206,20 @@ const PropertyDetail = () => {
                   {property.area} {property.area_unit} • {property.property_type}
                 </div>
                 <div className="space-y-3">
-                  <Button variant="gold" className="w-full" size="lg">
-                    <Calendar className="w-4 h-4 mr-2" /> Book Site Visit
-                  </Button>
-                  <Button variant="navy" className="w-full" size="lg">
-                    <Download className="w-4 h-4 mr-2" /> Download Report
-                  </Button>
+                  {property.sold_out ? (
+                    <div className="w-full bg-destructive/10 text-destructive text-center font-semibold py-3 rounded-lg uppercase tracking-wide text-sm">
+                      This property is sold out
+                    </div>
+                  ) : (
+                    <>
+                      <Button variant="gold" className="w-full" size="lg">
+                        <Calendar className="w-4 h-4 mr-2" /> Book Site Visit
+                      </Button>
+                      <Button variant="navy" className="w-full" size="lg">
+                        <Download className="w-4 h-4 mr-2" /> Download Report
+                      </Button>
+                    </>
+                  )}
                   <Button variant="outline" className="w-full" size="lg" asChild>
                     <a href="tel:+917219437006">
                       <Phone className="w-4 h-4 mr-2" /> Talk to Expert

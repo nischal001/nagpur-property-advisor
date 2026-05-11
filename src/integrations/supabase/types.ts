@@ -148,6 +148,7 @@ export type Database = {
           rera_registered: boolean | null
           risk_level: string | null
           seller_id: string | null
+          sold_out: boolean
           status: string
           submitter_email: string | null
           submitter_name: string | null
@@ -173,6 +174,7 @@ export type Database = {
           rera_registered?: boolean | null
           risk_level?: string | null
           seller_id?: string | null
+          sold_out?: boolean
           status?: string
           submitter_email?: string | null
           submitter_name?: string | null
@@ -198,6 +200,7 @@ export type Database = {
           rera_registered?: boolean | null
           risk_level?: string | null
           seller_id?: string | null
+          sold_out?: boolean
           status?: string
           submitter_email?: string | null
           submitter_name?: string | null

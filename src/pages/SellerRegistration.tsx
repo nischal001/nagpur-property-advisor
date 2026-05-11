@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, ArrowRight, ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowRight, ArrowLeft, Upload, Loader2, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import SEO from '@/components/SEO';
 import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES } from '@/lib/data';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +39,10 @@ const SellerRegistration = () => {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string>>({});
+  const [propertyImages, setPropertyImages] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const imagesInputRef = useRef<HTMLInputElement | null>(null);
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
@@ -49,6 +53,38 @@ const SellerRegistration = () => {
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const next = () => setStep(s => Math.min(s + 1, 3));
   const back = () => setStep(s => Math.max(s - 1, 0));
+
+  const handleImagesUpload = async (files: FileList | null) => {
+    if (!files || !files.length) return;
+    setUploadingImages(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) continue;
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 10MB`);
+          continue;
+        }
+        const folder = user?.id || 'submissions';
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.name.replace(/\s+/g, '-')}`;
+        const { error } = await supabase.storage.from('property-images').upload(path, file);
+        if (error) throw error;
+        const { data } = supabase.storage.from('property-images').getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+      if (urls.length) {
+        setPropertyImages(prev => [...prev, ...urls]);
+        toast.success(`${urls.length} photo${urls.length > 1 ? 's' : ''} added`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Image upload failed');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const removePropertyImage = (idx: number) =>
+    setPropertyImages(prev => prev.filter((_, i) => i !== idx));
 
   const handleDocUpload = async (docType: string, file: File) => {
     if (!ALLOWED_DOC_TYPES.includes(file.type)) {
@@ -119,6 +155,7 @@ const SellerRegistration = () => {
           submitter_name: form.name || null,
           submitter_phone: form.contactPhone || form.phone || null,
           submitter_email: form.email || null,
+          images: propertyImages,
           documents,
         },
       });
@@ -155,6 +192,11 @@ const SellerRegistration = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="List Your Property in Nagpur — Free, Verified, 2% Brokerage"
+        description="Sell your plot, flat, shop or land in Nagpur with V-Audit™ verified listings, photos, and a flat 2% managed brokerage. Submit details in 4 quick steps."
+        canonical="/seller"
+      />
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-2xl">
@@ -232,6 +274,41 @@ const SellerRegistration = () => {
                       {APPROVAL_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
                   </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className={labelClass}>Property Photos ({propertyImages.length})</label>
+                    <input
+                      ref={imagesInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={e => { handleImagesUpload(e.target.files); e.target.value = ''; }}
+                    />
+                    <Button type="button" variant="outline" size="sm" disabled={uploadingImages} onClick={() => imagesInputRef.current?.click()}>
+                      {uploadingImages ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Uploading</> : <><Upload className="w-4 h-4 mr-1" /> Add Photos</>}
+                    </Button>
+                  </div>
+                  {propertyImages.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {propertyImages.map((url, i) => (
+                        <div key={url} className="relative group aspect-square">
+                          <img src={url} alt={`Property photo ${i + 1}`} className="w-full h-full object-cover rounded-md border border-border" />
+                          <button type="button" onClick={() => removePropertyImage(i)}
+                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border border-dashed border-border rounded-lg p-6 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
+                      <ImageIcon className="w-6 h-6 opacity-50" />
+                      Add clear photos of your property (max 10 MB each). Buyers convert 5× more on listings with real photos.
+                    </div>
+                  )}
                 </div>
               </div>
             )}
