@@ -155,6 +155,7 @@ const SellerRegistration = () => {
           submitter_name: form.name || null,
           submitter_phone: form.contactPhone || form.phone || null,
           submitter_email: form.email || null,
+          images: propertyImages,
           documents,
         },
       });
@@ -268,6 +269,41 @@ const SellerRegistration = () => {
                       {APPROVAL_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
                   </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className={labelClass}>Property Photos ({propertyImages.length})</label>
+                    <input
+                      ref={imagesInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={e => { handleImagesUpload(e.target.files); e.target.value = ''; }}
+                    />
+                    <Button type="button" variant="outline" size="sm" disabled={uploadingImages} onClick={() => imagesInputRef.current?.click()}>
+                      {uploadingImages ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Uploading</> : <><Upload className="w-4 h-4 mr-1" /> Add Photos</>}
+                    </Button>
+                  </div>
+                  {propertyImages.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {propertyImages.map((url, i) => (
+                        <div key={url} className="relative group aspect-square">
+                          <img src={url} alt={`Property photo ${i + 1}`} className="w-full h-full object-cover rounded-md border border-border" />
+                          <button type="button" onClick={() => removePropertyImage(i)}
+                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border border-dashed border-border rounded-lg p-6 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
+                      <ImageIcon className="w-6 h-6 opacity-50" />
+                      Add clear photos of your property (max 10 MB each). Buyers convert 5× more on listings with real photos.
+                    </div>
+                  )}
                 </div>
               </div>
             )}
