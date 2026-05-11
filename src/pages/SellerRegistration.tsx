@@ -192,6 +192,11 @@ const SellerRegistration = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="List Your Property in Nagpur — Free, Verified, 2% Brokerage"
+        description="Sell your plot, flat, shop or land in Nagpur with V-Audit™ verified listings, photos, and a flat 2% managed brokerage. Submit details in 4 quick steps."
+        canonical="/seller"
+      />
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-2xl">
