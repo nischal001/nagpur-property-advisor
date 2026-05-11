@@ -156,8 +156,14 @@ const PropertyDetail = () => {
               </div>
 
               <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-                  <MapPin className="w-4 h-4" /> {property.location}, Nagpur
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-sm mb-2">
+                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {property.location}, Nagpur</span>
+                  {property.created_at && (
+                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> Listed {timeAgo(property.created_at)}</span>
+                  )}
+                  {property.sold_out && (
+                    <span className="text-destructive font-semibold uppercase text-xs tracking-wider">Sold Out</span>
+                  )}
                 </div>
                 <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">{property.title}</h1>
                 <p className="text-muted-foreground leading-relaxed mb-6">{property.description}</p>
