@@ -206,12 +206,20 @@ const PropertyDetail = () => {
                   {property.area} {property.area_unit} • {property.property_type}
                 </div>
                 <div className="space-y-3">
-                  <Button variant="gold" className="w-full" size="lg">
-                    <Calendar className="w-4 h-4 mr-2" /> Book Site Visit
-                  </Button>
-                  <Button variant="navy" className="w-full" size="lg">
-                    <Download className="w-4 h-4 mr-2" /> Download Report
-                  </Button>
+                  {property.sold_out ? (
+                    <div className="w-full bg-destructive/10 text-destructive text-center font-semibold py-3 rounded-lg uppercase tracking-wide text-sm">
+                      This property is sold out
+                    </div>
+                  ) : (
+                    <>
+                      <Button variant="gold" className="w-full" size="lg">
+                        <Calendar className="w-4 h-4 mr-2" /> Book Site Visit
+                      </Button>
+                      <Button variant="navy" className="w-full" size="lg">
+                        <Download className="w-4 h-4 mr-2" /> Download Report
+                      </Button>
+                    </>
+                  )}
                   <Button variant="outline" className="w-full" size="lg" asChild>
                     <a href="tel:+917219437006">
                       <Phone className="w-4 h-4 mr-2" /> Talk to Expert
