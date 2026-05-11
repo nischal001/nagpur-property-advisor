@@ -39,7 +39,10 @@ const SellerRegistration = () => {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string>>({});
+  const [propertyImages, setPropertyImages] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const imagesInputRef = useRef<HTMLInputElement | null>(null);
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
@@ -50,6 +53,38 @@ const SellerRegistration = () => {
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
   const next = () => setStep(s => Math.min(s + 1, 3));
   const back = () => setStep(s => Math.max(s - 1, 0));
+
+  const handleImagesUpload = async (files: FileList | null) => {
+    if (!files || !files.length) return;
+    setUploadingImages(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) continue;
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 10MB`);
+          continue;
+        }
+        const folder = user?.id || 'submissions';
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.name.replace(/\s+/g, '-')}`;
+        const { error } = await supabase.storage.from('property-images').upload(path, file);
+        if (error) throw error;
+        const { data } = supabase.storage.from('property-images').getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+      if (urls.length) {
+        setPropertyImages(prev => [...prev, ...urls]);
+        toast.success(`${urls.length} photo${urls.length > 1 ? 's' : ''} added`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Image upload failed');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const removePropertyImage = (idx: number) =>
+    setPropertyImages(prev => prev.filter((_, i) => i !== idx));
 
   const handleDocUpload = async (docType: string, file: File) => {
     if (!ALLOWED_DOC_TYPES.includes(file.type)) {
