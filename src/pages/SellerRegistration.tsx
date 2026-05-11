@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, ArrowRight, ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowRight, ArrowLeft, Upload, Loader2, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import SEO from '@/components/SEO';
 import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES } from '@/lib/data';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
