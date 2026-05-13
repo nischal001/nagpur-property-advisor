@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { MapPin, ShieldCheck, FileCheck, CheckCircle, XCircle, ArrowLeft, Phone, Download, Calendar, Clock } from 'lucide-react';
+import { MapPin, ShieldCheck, FileCheck, CheckCircle, XCircle, ArrowLeft, Phone, Download, Calendar, Clock, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import Navbar from '@/components/Navbar';
@@ -221,8 +221,12 @@ const PropertyDetail = () => {
                     </>
                   )}
                   <Button variant="outline" className="w-full" size="lg" asChild>
-                    <a href="tel:+917219437006">
-                      <Phone className="w-4 h-4 mr-2" /> Talk to Expert
+                    <a
+                      href={`https://wa.me/917219437006?text=${encodeURIComponent(`Hi, I'm interested in this property: ${property.title} located at ${property.location}, Nagpur. Please share more details. Link: ${window.location.origin}/property/${property.id}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> Talk to Expert
                     </a>
                   </Button>
                 </div>
