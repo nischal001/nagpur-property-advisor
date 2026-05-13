@@ -221,8 +221,12 @@ const PropertyDetail = () => {
                     </>
                   )}
                   <Button variant="outline" className="w-full" size="lg" asChild>
-                    <a href="tel:+917219437006">
-                      <Phone className="w-4 h-4 mr-2" /> Talk to Expert
+                    <a
+                      href={`https://wa.me/917219437006?text=${encodeURIComponent(`Hi, I'm interested in this property: ${property.title} located at ${property.location}, Nagpur. Please share more details. Link: ${window.location.origin}/property/${property.id}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> Talk to Expert
                     </a>
                   </Button>
                 </div>
