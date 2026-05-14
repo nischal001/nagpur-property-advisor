@@ -10,7 +10,7 @@ interface SEOProps {
   noindex?: boolean;
 }
 
-const SITE_URL = 'https://nagpur-property-advisor.lovable.app';
+const SITE_URL = 'https://nagpurpropertyadvisor.com';
 const DEFAULT_IMAGE = 'https://storage.googleapis.com/gpt-engineer-file-uploads/Wx7NrZVcROPc8bgdgUi0TPa1OMD3/social-images/social-1775927416704-NP.webp';
 
 const SEO = ({ title, description, canonical, image = DEFAULT_IMAGE, type = 'website', jsonLd, noindex }: SEOProps) => {

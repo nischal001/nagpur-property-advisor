@@ -224,28 +224,29 @@ const SellerRegistration = () => {
             {step === 0 && (
               <div className="space-y-5">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Basic Information</h3>
-                <div><label className={labelClass}>Full Name</label><input className={inputClass} value={form.name} onChange={e => update('name', e.target.value)} placeholder="Your full name" /></div>
-                <div><label className={labelClass}>Email</label><input className={inputClass} type="email" value={form.email} onChange={e => update('email', e.target.value)} placeholder="your@email.com" /></div>
-                <div><label className={labelClass}>Phone</label><input className={inputClass} value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="+91 98765 43210" /></div>
+                <div><label className={labelClass} htmlFor="sr-name">Full Name</label><input id="sr-name" className={inputClass} value={form.name} onChange={e => update('name', e.target.value)} placeholder="Your full name" /></div>
+                <div><label className={labelClass} htmlFor="sr-email">Email</label><input id="sr-email" className={inputClass} type="email" value={form.email} onChange={e => update('email', e.target.value)} placeholder="your@email.com" /></div>
+                <div><label className={labelClass} htmlFor="sr-phone">Phone</label><input id="sr-phone" className={inputClass} value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="+91 98765 43210" /></div>
               </div>
             )}
 
             {step === 1 && (
               <div className="space-y-5">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Property Details</h3>
-                <div><label className={labelClass}>Property Title</label><input className={inputClass} value={form.title} onChange={e => update('title', e.target.value)} placeholder="e.g. 2BHK Flat in Dharampeth" /></div>
-                <div><label className={labelClass}>Description</label><textarea className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-gold/30 outline-none min-h-[100px]" value={form.description} onChange={e => update('description', e.target.value)} placeholder="Describe your property..." /></div>
+                <div><label className={labelClass} htmlFor="sr-title">Property Title</label><input id="sr-title" className={inputClass} value={form.title} onChange={e => update('title', e.target.value)} placeholder="e.g. 2BHK Flat in Dharampeth" /></div>
+                <div><label className={labelClass} htmlFor="sr-desc">Description</label><textarea id="sr-desc" className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-gold/30 outline-none min-h-[100px]" value={form.description} onChange={e => update('description', e.target.value)} placeholder="Describe your property..." /></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClass}>Type</label>
-                    <select className={inputClass} value={form.propertyType} onChange={e => update('propertyType', e.target.value)}>
+                    <label className={labelClass} htmlFor="sr-type">Type</label>
+                    <select id="sr-type" className={inputClass} value={form.propertyType} onChange={e => update('propertyType', e.target.value)}>
                       <option value="">Select</option>
                       {PROPERTY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={labelClass}>Location</label>
+                    <label className={labelClass} htmlFor="sr-location">Location</label>
                     <select
+                      id="sr-location"
                       className={inputClass}
                       value={LOCATIONS.includes(form.location as any) ? form.location : (form.location ? '__other__' : '')}
                       onChange={e => update('location', e.target.value === '__other__' ? ' ' : e.target.value)}
@@ -266,10 +267,10 @@ const SellerRegistration = () => {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div><label className={labelClass}>Area (sq ft)</label><input className={inputClass} type="number" value={form.area} onChange={e => update('area', e.target.value)} /></div>
+                  <div><label className={labelClass} htmlFor="sr-area">Area (sq ft)</label><input id="sr-area" className={inputClass} type="number" value={form.area} onChange={e => update('area', e.target.value)} /></div>
                   <div>
-                    <label className={labelClass}>Approval Type</label>
-                    <select className={inputClass} value={form.approvalType} onChange={e => update('approvalType', e.target.value)}>
+                    <label className={labelClass} htmlFor="sr-approval">Approval Type</label>
+                    <select id="sr-approval" className={inputClass} value={form.approvalType} onChange={e => update('approvalType', e.target.value)}>
                       <option value="">Select</option>
                       {APPROVAL_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
@@ -361,8 +362,9 @@ const SellerRegistration = () => {
               <div className="space-y-5">
                 <h3 className="font-serif text-xl font-semibold text-foreground mb-4">Pricing & Contact</h3>
                 <div>
-                  <label className={labelClass}>Expected Price (₹)</label>
+                  <label className={labelClass} htmlFor="sr-price">Expected Price (₹)</label>
                   <input
+                    id="sr-price"
                     className={inputClass}
                     inputMode="numeric"
                     value={form.price ? formatINR(form.price) : ''}
@@ -373,7 +375,7 @@ const SellerRegistration = () => {
                     <p className="text-xs text-muted-foreground mt-1">{inrToWords(form.price)}</p>
                   )}
                 </div>
-                <div><label className={labelClass}>Contact Phone</label><input className={inputClass} value={form.contactPhone} onChange={e => update('contactPhone', e.target.value)} placeholder="+91 98765 43210" /></div>
+                <div><label className={labelClass} htmlFor="sr-contact">Contact Phone</label><input id="sr-contact" className={inputClass} value={form.contactPhone} onChange={e => update('contactPhone', e.target.value)} placeholder="+91 98765 43210" /></div>
               </div>
             )}
 

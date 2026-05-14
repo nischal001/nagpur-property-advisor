@@ -17,7 +17,7 @@ const Footer = () => (
           </p>
         </div>
         <div>
-          <h4 className="font-serif font-semibold text-primary-foreground mb-4">Quick Links</h4>
+          <h3 className="font-serif font-semibold text-primary-foreground mb-4">Quick Links</h3>
           <div className="space-y-2 text-sm">
             <Link to="/properties" className="block hover:text-gold transition-colors">Browse Properties</Link>
             <Link to="/seller" className="block hover:text-gold transition-colors">List Your Property</Link>
@@ -25,7 +25,7 @@ const Footer = () => (
           </div>
         </div>
         <div>
-          <h4 className="font-serif font-semibold text-primary-foreground mb-4">Services</h4>
+          <h3 className="font-serif font-semibold text-primary-foreground mb-4">Services</h3>
           <div className="space-y-2 text-sm">
             <p>Legal Verification</p>
             <p>7/12 Document Check</p>
@@ -34,7 +34,7 @@ const Footer = () => (
           </div>
         </div>
         <div>
-          <h4 className="font-serif font-semibold text-primary-foreground mb-4">Contact</h4>
+          <h3 className="font-serif font-semibold text-primary-foreground mb-4">Contact</h3>
           <div className="space-y-3 text-sm">
             <a href="tel:+917219437006" className="flex items-center gap-2 hover:text-gold transition-colors"><Phone className="w-4 h-4 text-gold" /> +91 72194 37006</a>
             <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-gold" /> info@nagpurproperty.com</div>

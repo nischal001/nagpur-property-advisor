@@ -6,7 +6,7 @@ import heroBg from '@/assets/hero-bg.jpg';
 const HeroSection = () => (
   <section className="relative min-h-[90vh] flex items-center overflow-hidden">
     <div className="absolute inset-0">
-      <img src={heroBg} alt="Nagpur skyline" className="w-full h-full object-cover" width={1920} height={1080} />
+      <img src={heroBg} alt="Nagpur skyline" className="w-full h-full object-cover" width={1920} height={1080} fetchPriority="high" decoding="async" />
       <div className="absolute inset-0 bg-navy-dark/80" />
     </div>
     <div className="container mx-auto px-4 relative z-10 py-32">
