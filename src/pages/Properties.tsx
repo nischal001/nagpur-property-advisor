@@ -81,7 +81,7 @@ const Properties = () => {
     itemListElement: filtered.slice(0, 20).map((p, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: `https://nagpur-property-advisor.lovable.app/property/${p.id}`,
+      url: `https://nagpurpropertyadvisor.com/property/${p.id}`,
       name: p.title,
     })),
   };
