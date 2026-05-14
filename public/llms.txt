@@ -1,0 +1,17 @@
+# Nagpur Property Advisor
+
+> Premium, trust-first real estate consultancy in Nagpur. Verified properties with V-Audit™ legal checks (NMRDA/NIT, RERA, 30-year title, 7/12, possession) and a flat 2% managed brokerage.
+
+Nagpur Property Advisor helps buyers and sellers transact residential and commercial properties — plots, flats, and bungalows — across Nagpur localities including Dharampeth, Sadar, Civil Lines, Manish Nagar, Wardha Road, Hingna, Besa, Ramdaspeth, and Sitabuldi. Every listing is independently verified before publication, and every transaction is supported end-to-end through registration.
+
+Contact: +91 72194 37006
+
+## Pages
+
+- [Home](/): Overview of services, V-Audit™ verification, and stamp duty calculator.
+- [Properties](/properties): Browse all verified properties for sale in Nagpur with freshness, location, and approval filters.
+- [List Your Property](/seller): Sellers submit a property for V-Audit™ verification and managed brokerage.
+
+## Optional
+
+- [Sign In](/auth): Account access for buyers, sellers, and admins.

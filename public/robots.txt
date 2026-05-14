@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /dashboard
 Disallow: /auth
 
-Sitemap: https://nagpur-property-advisor.lovable.app/sitemap.xml
+Sitemap: https://nagpurpropertyadvisor.com/sitemap.xml
