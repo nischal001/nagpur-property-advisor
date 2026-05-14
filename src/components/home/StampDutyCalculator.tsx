@@ -39,26 +39,29 @@ const StampDutyCalculator = () => {
           <div className="bg-navy-light/50 rounded-2xl p-8 border border-navy-light/30">
             <div className="space-y-5">
               <div>
-                <label className="text-sm text-primary-foreground/70 mb-2 block">Property Value (₹)</label>
+                <label htmlFor="sd-property-value" className="text-sm text-primary-foreground/70 mb-2 block">Property Value (₹)</label>
                 <input
+                  id="sd-property-value"
                   type="number"
                   placeholder="e.g. 5000000"
                   value={propertyValue}
                   onChange={(e) => setPropertyValue(e.target.value)}
-                  className="w-full h-12 rounded-lg bg-navy-dark border border-navy-light/40 text-primary-foreground px-4 text-sm placeholder:text-primary-foreground/30 focus:ring-2 focus:ring-gold/30 outline-none"
+                  className="w-full h-12 rounded-lg bg-navy-dark border border-navy-light/40 text-primary-foreground px-4 text-sm placeholder:text-primary-foreground/60 focus:ring-2 focus:ring-gold/30 outline-none"
                 />
               </div>
-              <div>
-                <label className="text-sm text-primary-foreground/70 mb-2 block">Buyer Gender</label>
+              <div role="group" aria-labelledby="sd-gender-label">
+                <span id="sd-gender-label" className="text-sm text-primary-foreground/70 mb-2 block">Buyer Gender</span>
                 <div className="flex gap-3">
                   {(['male', 'female'] as const).map(g => (
                     <button
                       key={g}
+                      type="button"
                       onClick={() => setGender(g)}
+                      aria-pressed={gender === g}
                       className={`flex-1 h-11 rounded-lg text-sm font-medium transition-all ${
                         gender === g
                           ? 'bg-gold text-navy-dark'
-                          : 'bg-navy-dark border border-navy-light/40 text-primary-foreground/60 hover:border-gold/40'
+                          : 'bg-navy-dark border border-navy-light/40 text-primary-foreground/80 hover:border-gold/40'
                       }`}
                     >
                       {g === 'male' ? 'Male (6%)' : 'Female (5%)'}

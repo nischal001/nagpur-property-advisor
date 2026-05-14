@@ -76,7 +76,12 @@ const Navbar = () => {
           )}
         </div>
 
-        <button className="md:hidden text-primary-foreground" onClick={() => setOpen(!open)}>
+        <button
+          className="md:hidden text-primary-foreground"
+          onClick={() => setOpen(!open)}
+          aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={open}
+        >
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>

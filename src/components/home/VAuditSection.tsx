@@ -33,7 +33,7 @@ const VAuditSection = () => (
             <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-gold/20 transition-colors">
               <c.icon className="w-6 h-6 text-gold" />
             </div>
-            <h4 className="font-semibold text-foreground text-sm mb-2">{c.label}</h4>
+            <h3 className="font-semibold text-foreground text-sm mb-2">{c.label}</h3>
             <p className="text-xs text-muted-foreground">{c.desc}</p>
           </div>
         ))}

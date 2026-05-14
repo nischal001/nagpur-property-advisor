@@ -6,6 +6,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -73,6 +74,14 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={isLogin ? 'Sign In — Nagpur Property Advisor' : 'Create Account — Nagpur Property Advisor'}
+        description={isLogin
+          ? 'Sign in to your Nagpur Property Advisor account to track verified listings, site visits, and seller submissions.'
+          : 'Create a free Nagpur Property Advisor account to buy verified properties or list your own with V-Audit™ legal checks.'}
+        canonical="/auth"
+        noindex
+      />
       <Navbar />
       <div className="pt-24 pb-16 flex items-center justify-center">
         <div className="w-full max-w-md px-4">
@@ -116,17 +125,18 @@ const Auth = () => {
               {!isLogin && (
                 <>
                   <div>
-                    <label className={labelClass}>Full Name</label>
-                    <input className={inputClass} value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+                    <label htmlFor="auth-name" className={labelClass}>Full Name</label>
+                    <input id="auth-name" className={inputClass} value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
                   </div>
-                  <div>
-                    <label className={labelClass}>I want to</label>
+                  <div role="group" aria-labelledby="auth-role-label">
+                    <span id="auth-role-label" className={labelClass}>I want to</span>
                     <div className="grid grid-cols-2 gap-3">
                       {(['buyer', 'seller'] as const).map(r => (
                         <button
                           key={r}
                           type="button"
                           onClick={() => setRole(r)}
+                          aria-pressed={role === r}
                           className={`h-11 rounded-lg border text-sm font-medium transition-all ${
                             role === r
                               ? 'border-gold bg-gold/10 text-foreground'
@@ -141,12 +151,12 @@ const Auth = () => {
                 </>
               )}
               <div>
-                <label className={labelClass}>Email</label>
-                <input className={inputClass} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required />
+                <label htmlFor="auth-email" className={labelClass}>Email</label>
+                <input id="auth-email" className={inputClass} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required autoComplete="email" />
               </div>
               <div>
-                <label className={labelClass}>Password</label>
-                <input className={inputClass} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+                <label htmlFor="auth-password" className={labelClass}>Password</label>
+                <input id="auth-password" className={inputClass} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} autoComplete={isLogin ? 'current-password' : 'new-password'} />
               </div>
               <Button variant="gold" className="w-full" size="lg" type="submit" disabled={loading}>
                 {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
