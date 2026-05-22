@@ -222,7 +222,7 @@ const PropertyDetail = () => {
                   )}
                   <Button variant="outline" className="w-full" size="lg" asChild>
                     <a
-                      href={`https://wa.me/917219437006?text=${encodeURIComponent(`Hi, I'm interested in this property: ${property.title} located at ${property.location}, Nagpur. Please share more details. Link: ${window.location.origin}/property/${property.id}`)}`}
+                      href={`https://wa.me/918010615388?text=${encodeURIComponent(`Hi, I'm interested in this property: ${property.title} located at ${property.location}, Nagpur. Please share more details. Link: ${window.location.origin}/property/${property.id}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
