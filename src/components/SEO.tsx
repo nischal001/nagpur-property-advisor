@@ -51,7 +51,7 @@ export const ORGANIZATION_LD = {
   url: SITE_URL,
   logo: `${SITE_URL}/placeholder.svg`,
   description: 'Premium, trust-first real estate consultancy in Nagpur with verified properties, V-Audit™ legal checks, and 2% managed brokerage.',
-  telephone: '+91-72194-37006',
+  telephone: '+91-80106-15388',
   areaServed: { '@type': 'City', name: 'Nagpur' },
   address: { '@type': 'PostalAddress', addressLocality: 'Nagpur', addressRegion: 'Maharashtra', addressCountry: 'IN' },
 };

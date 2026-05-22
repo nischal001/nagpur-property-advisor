@@ -2,7 +2,7 @@ import { MessageCircle } from 'lucide-react';
 
 const WhatsAppButton = () => (
   <a
-    href="https://wa.me/917219437006?text=Hi%2C%20I%20need%20property%20consultation%20in%20Nagpur"
+    href="https://wa.me/918010615388?text=Hi%2C%20I%20need%20property%20consultation%20in%20Nagpur"
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Chat with a Nagpur Property expert on WhatsApp"
