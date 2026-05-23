@@ -49,7 +49,7 @@ export const ORGANIZATION_LD = {
   '@type': 'RealEstateAgent',
   name: 'Nagpur Property Advisor',
   url: SITE_URL,
-  logo: `${SITE_URL}/placeholder.svg`,
+  logo: `${SITE_URL}/favicon.png`,
   description: 'Premium, trust-first real estate consultancy in Nagpur with verified properties, V-Audit™ legal checks, and 2% managed brokerage.',
   telephone: '+91-80106-15388',
   areaServed: { '@type': 'City', name: 'Nagpur' },
