@@ -11,6 +11,8 @@ import SellerRegistration from "./pages/SellerRegistration";
 import SellerDashboard from "./pages/SellerDashboard";
 import AdminPanel from "./pages/AdminPanel";
 import Auth from "./pages/Auth";
+import FlatsInNagpur from "./pages/FlatsInNagpur";
+import HousesForSaleInNagpur from "./pages/HousesForSaleInNagpur";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/flats-in-nagpur" element={<FlatsInNagpur />} />
+            <Route path="/houses-for-sale-in-nagpur" element={<HousesForSaleInNagpur />} />
             <Route path="/seller" element={<SellerRegistration />} />
             <Route path="/dashboard" element={<SellerDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
