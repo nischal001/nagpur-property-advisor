@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       inquiries: {
@@ -98,6 +105,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_public"
             referencedColumns: ["id"]
           },
         ]
@@ -255,6 +269,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -277,7 +298,78 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      properties_public: {
+        Row: {
+          approval_type: string | null
+          area: number | null
+          area_unit: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          images: string[] | null
+          location: string | null
+          possession_verified: boolean | null
+          price: number | null
+          property_type: string | null
+          rera_registered: boolean | null
+          risk_level: string | null
+          seller_id: string | null
+          sold_out: boolean | null
+          status: string | null
+          title: string | null
+          title_verified: boolean | null
+          updated_at: string | null
+          verified: boolean | null
+          visible: boolean | null
+        }
+        Insert: {
+          approval_type?: string | null
+          area?: number | null
+          area_unit?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          images?: string[] | null
+          location?: string | null
+          possession_verified?: boolean | null
+          price?: number | null
+          property_type?: string | null
+          rera_registered?: boolean | null
+          risk_level?: string | null
+          seller_id?: string | null
+          sold_out?: boolean | null
+          status?: string | null
+          title?: string | null
+          title_verified?: boolean | null
+          updated_at?: string | null
+          verified?: boolean | null
+          visible?: boolean | null
+        }
+        Update: {
+          approval_type?: string | null
+          area?: number | null
+          area_unit?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          images?: string[] | null
+          location?: string | null
+          possession_verified?: boolean | null
+          price?: number | null
+          property_type?: string | null
+          rera_registered?: boolean | null
+          risk_level?: string | null
+          seller_id?: string | null
+          sold_out?: boolean | null
+          status?: string | null
+          title?: string | null
+          title_verified?: boolean | null
+          updated_at?: string | null
+          verified?: boolean | null
+          visible?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
