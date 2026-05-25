@@ -13,6 +13,8 @@ const Navbar = () => {
   const links = [
     { to: '/', label: 'Home' },
     { to: '/properties', label: 'Properties' },
+    { to: '/flats-in-nagpur', label: 'Flats' },
+    { to: '/houses-for-sale-in-nagpur', label: 'Houses' },
     { to: '/seller', label: 'List Property' },
     ...(user && hasRole('seller') ? [{ to: '/dashboard', label: 'Dashboard' }] : []),
     ...(user && hasRole('admin') ? [{ to: '/admin', label: 'Admin' }] : []),

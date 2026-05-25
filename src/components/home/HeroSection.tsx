@@ -26,7 +26,12 @@ const HeroSection = () => (
           <Button variant="hero" size="lg" asChild>
             <Link to="/properties"><Search className="w-5 h-5 mr-2" /> Search Property</Link>
           </Button>
-          <Button variant="outline-light" size="lg">Get Expert Consultation</Button>
+          <Button variant="outline-light" size="lg" asChild>
+            <Link to="/flats-in-nagpur">Flats in Nagpur</Link>
+          </Button>
+          <Button variant="outline-light" size="lg" asChild>
+            <Link to="/houses-for-sale-in-nagpur">Houses for Sale</Link>
+          </Button>
         </div>
         <div className="flex flex-wrap gap-8 mt-12">
           {[
