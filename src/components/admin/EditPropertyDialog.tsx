@@ -28,10 +28,22 @@ const EditPropertyDialog = ({ open, onClose, property, seller, onSaved }: Props)
   const [form, setForm] = useState<any>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [submitter, setSubmitter] = useState<{ submitter_name: string | null; submitter_phone: string | null; submitter_email: string | null } | null>(null);
 
   useEffect(() => {
     if (property) setForm({ ...EMPTY, ...property, images: property.images || [] });
   }, [property]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setSubmitter(null);
+    if (!property?.id) return;
+    (async () => {
+      const { data } = await (supabase as any).rpc('get_property_submitter', { _property_id: property.id });
+      if (!cancelled && Array.isArray(data) && data.length > 0) setSubmitter(data[0]);
+    })();
+    return () => { cancelled = true; };
+  }, [property?.id]);
 
   if (!property) return null;
 
