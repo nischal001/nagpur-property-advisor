@@ -99,7 +99,7 @@ const EditPropertyDialog = ({ open, onClose, property, seller, onSaved }: Props)
           <DialogTitle>Edit Property</DialogTitle>
         </DialogHeader>
 
-        {(seller || property?.submitter_name || property?.submitter_phone || property?.submitter_email) && (
+        {(seller || submitter?.submitter_name || submitter?.submitter_phone || submitter?.submitter_email) && (
           <div className="bg-muted rounded-lg p-3 text-sm space-y-2">
             {seller && (
               <div className="space-y-1">
@@ -108,11 +108,11 @@ const EditPropertyDialog = ({ open, onClose, property, seller, onSaved }: Props)
                 <div className="flex items-center gap-2 text-muted-foreground"><Phone className="w-3.5 h-3.5" /> {seller.phone || '—'}</div>
               </div>
             )}
-            {(property?.submitter_name || property?.submitter_phone || property?.submitter_email) && (
+            {(submitter?.submitter_name || submitter?.submitter_phone || submitter?.submitter_email) && (
               <div className="space-y-1 pt-2 border-t border-border/60">
-                <div className="font-medium text-foreground">Submitted in Listing Form: {property.submitter_name || '—'}</div>
-                <div className="flex items-center gap-2 text-muted-foreground"><Mail className="w-3.5 h-3.5" /> {property.submitter_email || '—'}</div>
-                <div className="flex items-center gap-2 text-muted-foreground"><Phone className="w-3.5 h-3.5" /> {property.submitter_phone || '—'}</div>
+                <div className="font-medium text-foreground">Submitted in Listing Form: {submitter.submitter_name || '—'}</div>
+                <div className="flex items-center gap-2 text-muted-foreground"><Mail className="w-3.5 h-3.5" /> {submitter.submitter_email || '—'}</div>
+                <div className="flex items-center gap-2 text-muted-foreground"><Phone className="w-3.5 h-3.5" /> {submitter.submitter_phone || '—'}</div>
               </div>
             )}
           </div>
