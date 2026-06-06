@@ -51,8 +51,8 @@ const FAQ_LD = {
 const Index = () => (
   <div className="min-h-screen">
     <SEO
-      title="Nagpur Property Advisor — Verified Properties & 2% Brokerage"
-      description="Buy & sell verified properties in Nagpur with V-Audit™ legal checks, RERA & title verification, and a flat 2% managed brokerage. Risk-free real estate consultancy."
+      title="Nagpur Property Advisor — Verified Properties with V-Audit™"
+      description="Buy & sell verified properties in Nagpur with V-Audit™ legal checks, RERA & title verification, and end-to-end paperwork support. Risk-free real estate consultancy."
       canonical="/"
       jsonLd={[ORGANIZATION_LD, FAQ_LD]}
     />
