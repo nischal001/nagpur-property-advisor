@@ -20,7 +20,7 @@ const HeroSection = () => (
           <span className="text-gradient-gold">100% Risk-Free</span> Guarantee
         </h1>
         <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl leading-relaxed">
-          Just 2% brokerage with complete legal verification, 7/12 document check, and end-to-end ownership transfer. Your property, our guarantee.
+          Complete legal verification, 7/12 document check, and end-to-end ownership transfer with full transparency. Your property, our guarantee.
         </p>
         <div className="flex flex-wrap gap-4">
           <Button variant="hero" size="lg" asChild>
