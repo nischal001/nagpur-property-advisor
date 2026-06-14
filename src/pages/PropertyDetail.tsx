@@ -206,29 +206,37 @@ const PropertyDetail = () => {
                   {property.area} {property.area_unit} • {property.property_type}
                 </div>
                 <div className="space-y-3">
-                  {property.sold_out ? (
-                    <div className="w-full bg-destructive/10 text-destructive text-center font-semibold py-3 rounded-lg uppercase tracking-wide text-sm">
-                      This property is sold out
-                    </div>
-                  ) : (
-                    <>
-                      <Button variant="gold" className="w-full" size="lg">
-                        <Calendar className="w-4 h-4 mr-2" /> Book Site Visit
-                      </Button>
-                      <Button variant="navy" className="w-full" size="lg">
-                        <Download className="w-4 h-4 mr-2" /> Download Report
-                      </Button>
-                    </>
-                  )}
-                  <Button variant="outline" className="w-full" size="lg" asChild>
-                    <a
-                      href={`https://wa.me/918010615388?text=${encodeURIComponent(`Hi, I'm interested in this property: ${property.title} located at ${property.location}, Nagpur. Please share more details. Link: ${window.location.origin}/property/${property.id}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" /> Talk to Expert
-                    </a>
-                  </Button>
+                  {(() => {
+                    const propertyLink = `${window.location.origin}/property/${property.id}`;
+                    const waUrl = (msg: string) =>
+                      `https://wa.me/918010615388?text=${encodeURIComponent(msg)}`;
+                    const visitMsg = `Hi, I'd like to book a site visit for "${property.title}" at ${property.location}, Nagpur. Please help me schedule a convenient time. Link: ${propertyLink}`;
+                    const detailsMsg = `Hi, I'd like more details about "${property.title}" at ${property.location}, Nagpur (V-Audit report, documents, pricing, etc.). Link: ${propertyLink}`;
+                    const expertMsg = `Hi, I'm interested in this property: ${property.title} located at ${property.location}, Nagpur. Please share more details. Link: ${propertyLink}`;
+                    return property.sold_out ? (
+                      <div className="w-full bg-destructive/10 text-destructive text-center font-semibold py-3 rounded-lg uppercase tracking-wide text-sm">
+                        This property is sold out
+                      </div>
+                    ) : (
+                      <>
+                        <Button variant="gold" className="w-full" size="lg" asChild>
+                          <a href={waUrl(visitMsg)} target="_blank" rel="noopener noreferrer">
+                            <Calendar className="w-4 h-4 mr-2" /> Book Site Visit
+                          </a>
+                        </Button>
+                        <Button variant="navy" className="w-full" size="lg" asChild>
+                          <a href={waUrl(detailsMsg)} target="_blank" rel="noopener noreferrer">
+                            <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp Us for More Details
+                          </a>
+                        </Button>
+                        <Button variant="outline" className="w-full" size="lg" asChild>
+                          <a href={waUrl(expertMsg)} target="_blank" rel="noopener noreferrer">
+                            <MessageCircle className="w-4 h-4 mr-2" /> Talk to Expert
+                          </a>
+                        </Button>
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="mt-6 p-4 bg-muted rounded-lg">
                   <p className="text-xs text-muted-foreground text-center">
