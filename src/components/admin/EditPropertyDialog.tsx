@@ -39,8 +39,12 @@ const EditPropertyDialog = ({ open, onClose, property, seller, onSaved }: Props)
     setSubmitter(null);
     if (!property?.id) return;
     (async () => {
-      const { data } = await (supabase as any).rpc('get_property_submitter', { _property_id: property.id });
-      if (!cancelled && Array.isArray(data) && data.length > 0) setSubmitter(data[0]);
+      const { data } = await supabase
+        .from('properties')
+        .select('submitter_name, submitter_phone, submitter_email')
+        .eq('id', property.id)
+        .maybeSingle();
+      if (!cancelled && data) setSubmitter(data as any);
     })();
     return () => { cancelled = true; };
   }, [property?.id]);
