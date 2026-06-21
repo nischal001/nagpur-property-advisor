@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.get_property_submitter(uuid);
