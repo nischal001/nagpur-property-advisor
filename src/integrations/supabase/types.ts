@@ -372,14 +372,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_property_submitter: {
-        Args: { _property_id: string }
-        Returns: {
-          submitter_email: string
-          submitter_name: string
-          submitter_phone: string
-        }[]
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
