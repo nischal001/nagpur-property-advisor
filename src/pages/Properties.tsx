@@ -6,8 +6,10 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import PropertyCard from '@/components/PropertyCard';
 import SEO, { ORGANIZATION_LD } from '@/components/SEO';
-import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES, dummyProperties, type Property } from '@/lib/data';
+import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES, type Property } from '@/lib/data';
 import { supabase } from '@/integrations/supabase/client';
+
+const PROPERTY_CATALOG_COLUMNS = 'id,title,description,price,location,property_type,area,area_unit,approval_type,status,verified,rera_registered,title_verified,possession_verified,risk_level,images,created_at,updated_at,visible,sold_out';
 
 const FRESHNESS_OPTIONS = [
   { value: '', label: 'Any time' },
@@ -25,11 +27,11 @@ const Properties = () => {
   const [freshness, setFreshness] = useState('');
   const [sort, setSort] = useState('recent');
   const [showFilters, setShowFilters] = useState(false);
-  const [properties, setProperties] = useState<Property[]>(dummyProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
 
   useEffect(() => {
     const fetchProperties = async () => {
-      let query = supabase.from('properties').select('*').eq('status', 'approved').eq('visible', true);
+      let query = supabase.from('properties').select(PROPERTY_CATALOG_COLUMNS).eq('status', 'approved').eq('visible', true);
       if (type) query = query.eq('property_type', type);
       if (location) query = query.eq('location', location);
       if (approval) query = query.eq('approval_type', approval);
@@ -41,8 +43,8 @@ const Properties = () => {
       else if (sort === 'price-desc') query = query.order('price', { ascending: false });
       else query = query.order('created_at', { ascending: false });
 
-      const { data } = await query;
-      if (data && data.length > 0) {
+      const { data, error } = await query;
+      if (!error && data) {
         setProperties(data.map((p: any) => ({
           id: p.id,
           title: p.title,
@@ -64,6 +66,9 @@ const Properties = () => {
           createdAt: p.created_at,
           soldOut: p.sold_out || false,
         })));
+      } else {
+        console.error('Failed to load properties:', error);
+        setProperties([]);
       }
     };
     fetchProperties();
