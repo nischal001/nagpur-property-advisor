@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import PropertyCard from '@/components/PropertyCard';
 import SEO, { ORGANIZATION_LD } from '@/components/SEO';
-import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES, dummyProperties, type Property } from '@/lib/data';
+import { LOCATIONS, PROPERTY_TYPES, APPROVAL_TYPES, type Property } from '@/lib/data';
 import { supabase } from '@/integrations/supabase/client';
 
 const PROPERTY_CATALOG_COLUMNS = 'id,title,description,price,location,property_type,area,area_unit,approval_type,status,verified,rera_registered,title_verified,possession_verified,risk_level,images,created_at,updated_at,visible,sold_out';
